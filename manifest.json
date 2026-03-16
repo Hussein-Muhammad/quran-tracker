@@ -2,7 +2,7 @@
   "name": "متابع حفظ القرآن",
   "short_name": "حفظ القرآن",
   "description": "تطبيق متابعة حفظ ومراجعة القرآن الكريم",
-  "start_url": "/index.html",
+  "start_url": ".",
   "display": "standalone",
   "orientation": "portrait",
   "dir": "rtl",
