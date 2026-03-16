@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta name="description" content="تطبيق متابعة حفظ ومراجعة القرآن الكريم">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>متابع حفظ القرآن</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #1a1a2e;
+      --bg2: #16213e;
+      --bg3: #0f3460;
+      --card: #1e2746;
+      --card2: #253256;
+      --gold: #d4a843;
+      --gold2: #c9952a;
+      --green: #2ecc71;
+      --red: #e74c3c;
+      --cream: #f5e6ca;
+      --text: #e8e8e8;
+      --text2: #a0a0b8;
+      --accent: #d4a843;
+      --radius: 16px;
+      --shadow: 0 4px 20px rgba(0, 0, 0, .3);
+      font-family: 'Noto Naskh Arabic', 'Amiri', sans-serif
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 16px;
+      padding-bottom: 80px;
+      transition: background .3s, color .3s
+    }
+
+    body.light {
+      --bg: #f5f0e8;
+      --bg2: #ede4d3;
+      --bg3: #d4c4a8;
+      --card: #fff;
+      --card2: #f9f3ea;
+      --text: #2c2c2c;
+      --text2: #6b6b6b;
+      --shadow: 0 4px 20px rgba(0, 0, 0, .08)
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--bg2), var(--bg3));
+      padding: 20px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow)
+    }
+
+    .header h1 {
+      font-family: 'Amiri', serif;
+      font-size: 1.6em;
+      color: var(--gold);
+      margin-bottom: 2px
+    }
+
+    .header .subtitle {
+      font-size: .85em;
+      color: var(--text2)
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px
+    }
+
+    .header-actions button {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .header-actions button:hover {
+      background: var(--gold);
+      color: var(--bg)
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 12px
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(212, 168, 67, .08);
+      transition: transform .2s
+    }
+
+    .card:active {
+      transform: scale(.98)
+    }
+
+    .card-title {
+      font-family: 'Amiri', serif;
+      font-size: 1.2em;
+      color: var(--gold);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .card-title .icon {
+      font-size: 1.3em
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: .95em;
+      cursor: pointer;
+      transition: all .2s;
+      font-weight: 600
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #1a1a2e;
+      box-shadow: 0 4px 15px rgba(212, 168, 67, .3)
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 168, 67, .4)
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--green), #27ae60);
+      color: #fff
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--red), #c0392b);
+      color: #fff
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1.5px solid var(--gold);
+      color: var(--gold)
+    }
+
+    .btn-sm {
+      padding: 8px 14px;
+      font-size: .85em;
+      border-radius: 8px
+    }
+
+    .btn-block {
+      width: 100%;
+      justify-content: center
+    }
+
+    .btn:disabled {
+      opacity: .5;
+      cursor: not-allowed
+    }
+
+    .revision-item {
+      background: var(--card2);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-right: 3px solid var(--gold);
+      animation: slideIn .3s ease
+    }
+
+    .revision-item .info {
+      flex: 1
+    }
+
+    .revision-item .surah {
+      font-weight: 600;
+      color: var(--cream);
+      font-size: 1em
+    }
+
+    .revision-item .ayah {
+      font-size: .82em;
+      color: var(--text2);
+      margin-top: 2px
+    }
+
+    .revision-item .days-left {
+      font-size: .75em;
+      color: var(--gold);
+      margin-top: 3px
+    }
+
+    .revision-item .check-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid var(--green);
+      background: transparent;
+      color: var(--green);
+      font-size: 1.2em;
+      cursor: pointer;
+      transition: all .2s;
+      flex-shrink: 0
+    }
+
+    .revision-item .check-btn:hover,
+    .revision-item .check-btn.done {
+      background: var(--green);
+      color: #fff
+    }
+
+    .counter-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap
+    }
+
+    .counter-row label {
+      color: var(--text2);
+      font-size: .9em;
+      min-width: 60px
+    }
+
+    .counter-circles {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .counter-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: transparent;
+      color: var(--gold);
+      font-size: .85em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .counter-circle.filled {
+      background: var(--gold);
+      color: var(--bg)
+    }
+
+    .counter-circle.extra {
+      border-style: dashed;
+      font-size: .75em
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--card2);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 8px 0
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--green));
+      border-radius: 4px;
+      transition: width .5s ease
+    }
+
+    .form-group {
+      margin-bottom: 14px
+    }
+
+    .form-group label {
+      display: block;
+      color: var(--text2);
+      font-size: .88em;
+      margin-bottom: 5px
+    }
+
+    .form-group select,
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid rgba(212, 168, 67, .2);
+      border-radius: 10px;
+      background: var(--card2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .95em;
+      transition: border-color .2s
+    }
+
+    .form-group select:focus,
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--gold)
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 10px
+    }
+
+    .tab-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg2);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 env(safe-area-inset-bottom, 8px);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, .3);
+      z-index: 100;
+      border-top: 1px solid rgba(212, 168, 67, .1)
+    }
+
+    .tab-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text2);
+      font-size: .7em;
+      cursor: pointer;
+      padding: 4px 12px;
+      border-radius: 8px;
+      transition: all .2s;
+      border: none;
+      background: none;
+      font-family: inherit
+    }
+
+    .tab-item.active {
+      color: var(--gold)
+    }
+
+    .tab-item .tab-icon {
+      font-size: 1.5em
+    }
+
+    .page {
+      display: none;
+      animation: fadeIn .3s ease
+    }
+
+    .page.active {
+      display: block
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px;
+      color: var(--text2)
+    }
+
+    .empty-state .empty-icon {
+      font-size: 3em;
+      margin-bottom: 10px;
+      opacity: .5
+    }
+
+    .empty-state p {
+      font-size: .95em
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .05)
+    }
+
+    .setting-item label {
+      color: var(--text);
+      font-size: .95em
+    }
+
+    .setting-item input[type=number] {
+      width: 70px;
+      text-align: center;
+      padding: 8px;
+      border: 1.5px solid rgba(212, 168, 67, .2);
+      border-radius: 8px;
+      background: var(--card2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .95em
+    }
+
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 28px;
+      cursor: pointer
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0
+    }
+
+    .toggle .slider {
+      position: absolute;
+      inset: 0;
+      background: var(--card2);
+      border-radius: 14px;
+      transition: .3s
+    }
+
+    .toggle .slider:before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--text2);
+      bottom: 3px;
+      right: 3px;
+      transition: .3s
+    }
+
+    .toggle input:checked+.slider {
+      background: var(--gold)
+    }
+
+    .toggle input:checked+.slider:before {
+      transform: translateX(-22px);
+      background: #fff
+    }
+
+    .streak-badge {
+      background: linear-gradient(135deg, #f39c12, #e67e22);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: .85em;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 600
+    }
+
+    .tadabbur-page-display {
+      text-align: center;
+      padding: 20px;
+      background: var(--card2);
+      border-radius: 12px;
+      margin: 10px 0
+    }
+
+    .tadabbur-page-display .page-num {
+      font-family: 'Amiri', serif;
+      font-size: 3em;
+      color: var(--gold);
+      line-height: 1
+    }
+
+    .tadabbur-page-display .page-label {
+      color: var(--text2);
+      font-size: .9em;
+      margin-top: 5px
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 10px 0
+    }
+
+    .stat-card {
+      background: var(--card2);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center
+    }
+
+    .stat-card .stat-value {
+      font-family: 'Amiri', serif;
+      font-size: 1.8em;
+      color: var(--gold);
+      line-height: 1.2
+    }
+
+    .stat-card .stat-label {
+      font-size: .78em;
+      color: var(--text2);
+      margin-top: 4px
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .6);
+      z-index: 200;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn .2s
+    }
+
+    .modal-overlay.show {
+      display: flex
+    }
+
+    .modal {
+      background: var(--card);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 500px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 20px;
+      animation: slideUp .3s ease
+    }
+
+    .modal-title {
+      font-family: 'Amiri', serif;
+      font-size: 1.2em;
+      color: var(--gold);
+      margin-bottom: 15px;
+      text-align: center
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      background: none;
+      border: none;
+      color: var(--text2);
+      font-size: 1.3em;
+      cursor: pointer
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0
+      }
+
+      to {
+        opacity: 1
+      }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(20px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%)
+      }
+
+      to {
+        transform: translateY(0)
+      }
+    }
+
+    .install-banner {
+      background: linear-gradient(135deg, var(--bg3), var(--bg2));
+      border: 1px solid var(--gold);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+      display: none;
+      text-align: center
+    }
+
+    .install-banner.show {
+      display: block
+    }
+
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: .9em;
+      z-index: 300;
+      animation: fadeIn .3s;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .3);
+      max-width: 90%;
+      text-align: center
+    }
+
+    .toast.error {
+      background: var(--red)
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px
+    }
+
+    .section-header .card-title {
+      margin-bottom: 0
+    }
+
+    .multi-surah-toggle {
+      font-size: .8em;
+      color: var(--gold);
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-family: inherit
+    }
+
+    .form-section {
+      background: var(--card2);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border-right: 3px solid var(--gold)
+    }
+
+    .form-section-title {
+      font-family: 'Amiri', serif;
+      font-size: 1em;
+      color: var(--gold);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .ayah-hint {
+      font-size: .75em;
+      color: var(--text2);
+      margin-top: 2px
+    }
+
+    .slot-entry {
+      padding: 10px 0;
+      border-bottom: 1px dashed rgba(212, 168, 67, .15);
+      margin-bottom: 4px
+    }
+
+    .slot-entry:last-child {
+      border-bottom: none;
+      margin-bottom: 0
+    }
+
+    @media(min-width:600px) {
+      .container {
+        padding: 20px
+      }
+    }
+
+    .icon svg,
+    .tab-icon svg,
+    .form-section-title svg,
+    .card-title svg,
+    .streak-badge svg,
+    .stat-label svg,
+    .empty-icon svg,
+    .setting-item svg,
+    .btn svg,
+    .check-btn svg,
+    .days-left svg {
+      vertical-align: -0.125em;
+    }
+
+    .header-actions button svg {
+      width: 1.1em;
+      height: 1.1em;
+      vertical-align: middle;
+    }
+
+    .tab-icon svg {
+      width: 1.5em;
+      height: 1.5em;
+    }
+
+    .empty-icon svg {
+      width: 3em;
+      height: 3em;
+      opacity: .5;
+    }
+
+    .delete-data-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .delete-data-grid .btn {
+      font-size: .85em;
+      padding: 10px 14px;
+      justify-content: flex-start;
+      gap: 8px;
+    }
+
+    .delete-data-grid .btn svg {
+      flex-shrink: 0;
+    }
+
+    .btn-danger-outline {
+      background: transparent;
+      border: 1.5px solid var(--red);
+      color: var(--red);
+    }
+
+    .btn-danger-outline:hover {
+      background: var(--red);
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h1>﷽</h1>
+    <h1>متابع حفظ القرآن</h1>
+    <p class="subtitle">ماذا أراجع اليوم؟</p>
+    <div class="header-actions">
+      <button onclick="toggleTheme()" title="تبديل المظهر" id="themeBtn"></button>
+      <button onclick="showPage('settings')" title="الإعدادات" id="settingsBtn"></button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner">
+      <p style="margin-bottom:8px;color:var(--cream)" id="installText">أضف التطبيق للشاشة الرئيسية</p>
+      <button class="btn btn-primary btn-sm" onclick="installApp()">تثبيت</button>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div class="page active" id="pageDashboard">
+      <div id="streakCard" class="card" style="text-align:center;display:none">
+        <span class="streak-badge" id="streakBadge"><span id="streakCount">0</span> يوم متتالي</span>
+      </div>
+      <div id="track1Dashboard"></div>
+      <div id="track2Dashboard"></div>
+      <div id="track3Dashboard"></div>
+      <div id="emptyDashboard" class="empty-state">
+        <div class="empty-icon" id="emptyIcon"></div>
+        <p>لا توجد مهام اليوم<br>ابدأ بتسجيل جلسة جديدة</p>
+      </div>
+    </div>
+
+    <!-- Session Logging Page -->
+    <div class="page" id="pageSession">
+      <div class="card">
+        <div class="card-title"><span class="icon" id="sessionIcon"></span> تسجيل جلسة جديدة</div>
+        <div class="form-group">
+          <label>التاريخ</label>
+          <input type="date" id="sessionDate">
+        </div>
+
+        <!-- New Memorization Slots -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="form-section-title" id="newMemTitle"></div>
+            <button class="multi-surah-toggle" onclick="addSlot('new')">+ أضف سورة</button>
+          </div>
+          <div id="newSlots"></div>
+        </div>
+
+        <!-- Old Revision Slots -->
+        <div class="form-section">
+          <div class="section-header">
+            <div class="form-section-title" id="oldRevTitle"></div>
+            <button class="multi-surah-toggle" onclick="addSlot('old')">+ أضف سورة</button>
+          </div>
+          <div id="oldSlots"></div>
+        </div>
+
+        <button class="btn btn-primary btn-block" onclick="saveSession()" id="saveSessionBtn">حفظ الجلسة</button>
+      </div>
+    </div>
+
+    <!-- Review Cycle Page -->
+    <div class="page" id="pageReview">
+      <div id="activeCycle"></div>
+      <div class="card" id="newCycleForm">
+        <div class="card-title"><span class="icon" id="newCycleIcon"></span> دورة مراجعة جديدة</div>
+        <div class="form-group">
+          <label>اختر طريقة التحديد</label>
+          <select id="cycleMode" onchange="toggleCycleMode()">
+            <option value="pages">حسب الصفحات</option>
+            <option value="surah">حسب السورة</option>
+          </select>
+        </div>
+        <div id="cyclePagesMode">
+          <div class="form-row">
+            <div class="form-group"><label>من صفحة</label><input type="number" id="cyclePageStart" min="1" max="604"
+                placeholder="1"></div>
+            <div class="form-group"><label>إلى صفحة</label><input type="number" id="cyclePageEnd" min="1" max="604"
+                placeholder="10"></div>
+          </div>
+        </div>
+        <div id="cycleSurahMode" style="display:none">
+          <div class="form-row">
+            <div class="form-group"><label>من سورة</label><select id="cycleSurahStart"></select></div>
+            <div class="form-group"><label>إلى سورة</label><select id="cycleSurahEnd"></select></div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="createCycle()" id="createCycleBtn">إنشاء الدورة</button>
+      </div>
+    </div>
+
+    <!-- Tadabbur Page -->
+    <div class="page" id="pageTadabbur">
+      <div id="tadabburContent"></div>
+    </div>
+
+    <!-- Settings Page -->
+    <div class="page" id="pageSettings">
+      <div class="card">
+        <div class="card-title"><span class="icon" id="settingsIcon"></span> الإعدادات</div>
+        <div class="setting-item"><label><span class="setting-item-icon" id="setTrack1Icon"></span> حفظ الجديد</label><label class="toggle"><input type="checkbox"
+              id="setTrack1" checked onchange="saveSetting()"><span class="slider"></span></label></div>
+        <div class="setting-item"><label><span class="setting-item-icon" id="setTrack2Icon"></span> مراجعة الماضي</label><label class="toggle"><input type="checkbox"
+              id="setTrack2" checked onchange="saveSetting()"><span class="slider"></span></label></div>
+        <div class="setting-item"><label><span class="setting-item-icon" id="setTrack3Icon"></span> تدبر</label><label class="toggle"><input type="checkbox" id="setTrack3"
+              checked onchange="saveSetting()"><span class="slider"></span></label></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon" id="revSettingsIcon"></span> إعدادات المراجعة</div>
+        <div class="setting-item"><label>عدد القراءة الافتراضي</label><input type="number" id="setReads" min="1"
+            max="10" value="1" onchange="saveSetting()"></div>
+        <div class="setting-item"><label>عدد الاستماع الافتراضي</label><input type="number" id="setListens" min="1"
+            max="10" value="2" onchange="saveSetting()"></div>
+        <div class="setting-item"><label>أيام الدورة</label><input type="number" id="setCycleDays" min="1" max="30"
+            value="5" onchange="saveSetting()"></div>
+        <div class="setting-item"><label>صفحات لكل دورة (افتراضي)</label><input type="number" id="setCyclePages" min="1"
+            max="604" value="10" onchange="saveSetting()"></div>
+        <div class="setting-item"><label>تقاطع صفحات المراجعة</label><input type="number" id="setIntersection" min="0"
+            max="10" value="0" onchange="saveSetting()"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon" id="tadSettingsIcon"></span> إعدادات التدبر</div>
+        <div class="setting-item"><label>صفحات التدبر يومياً</label><input type="number" id="setTadabburPages" min="1"
+            max="10" value="1" onchange="saveSetting()"></div>
+        <div class="setting-item"><label>بدء التدبر من صفحة</label><input type="number" id="setTadabburStart" min="1"
+            max="604" value="1" onchange="saveSetting()"></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon" id="dataIcon"></span> حذف البيانات</div>
+        <div class="delete-data-grid">
+          <button class="btn btn-danger-outline btn-block" onclick="deleteDataType('qt_revisions','جلسات الحفظ والمراجعة اليومية')">
+            <span id="delRevIcon"></span> جلسات الحفظ والمراجعة اليومية
+          </button>
+          <button class="btn btn-danger-outline btn-block" onclick="deleteDataType('qt_cycles','دورات المراجعة')">
+            <span id="delCycIcon"></span> دورات المراجعة
+          </button>
+          <button class="btn btn-danger-outline btn-block" onclick="deleteDataType('qt_tadabbur','بيانات التدبر')">
+            <span id="delTadIcon"></span> بيانات التدبر
+          </button>
+          <button class="btn btn-danger-outline btn-block" onclick="deleteDataType('qt_activity','سجل النشاط والأيام المتتالية')">
+            <span id="delActIcon"></span> سجل النشاط والأيام المتتالية
+          </button>
+          <button class="btn btn-danger btn-block" style="margin-top:4px" onclick="deleteAllData()">
+            <span id="delAllIcon"></span> حذف جميع البيانات
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Page -->
+    <div class="page" id="pageStats">
+      <div id="statsContent"></div>
+    </div>
+  </div>
+
+  <nav class="tab-bar">
+    <button class="tab-item active" onclick="showPage('dashboard')" id="tabDashboard"><span
+        class="tab-icon" id="tabIconHome"></span>الرئيسية</button>
+    <button class="tab-item" onclick="showPage('session')" id="tabSession"><span class="tab-icon" id="tabIconSession"></span>جلسة</button>
+    <button class="tab-item" onclick="showPage('review')" id="tabReview"><span class="tab-icon" id="tabIconReview"></span>مراجعة</button>
+    <button class="tab-item" onclick="showPage('tadabbur')" id="tabTadabbur"><span
+        class="tab-icon" id="tabIconTadabbur"></span>تدبر</button>
+    <button class="tab-item" onclick="showPage('stats')" id="tabStats"><span class="tab-icon" id="tabIconStats"></span>إحصائيات</button>
+  </nav>
+
+  <script>
+    'use strict';
+
+    // ===== SVG ICONS =====
+    const ICONS = {
+      moon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`,
+      sun: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`,
+      gear: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`,
+      home: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+      edit: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+      refresh: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>`,
+      thought: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>`,
+      barChart: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+      book: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>`,
+      bookOpen: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>`,
+      save: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
+      check: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+      checkCircle: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+      trash: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>`,
+      plusCircle: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>`,
+      flame: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 2.5z"/></svg>`,
+      clock: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+      star: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+      sparkles: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>`,
+      download: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+      skipForward: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>`,
+      database: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
+      calendar: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+    };
+
+    // ===== SURAH DATA [name, ayahCount, startPage] =====
+    const SURAHS = [
+      ["الفاتحة", 7, 1], ["البقرة", 286, 2], ["آل عمران", 200, 50], ["النساء", 176, 77], ["المائدة", 120, 106],
+      ["الأنعام", 165, 128], ["الأعراف", 206, 151], ["الأنفال", 75, 177], ["التوبة", 129, 187], ["يونس", 109, 208],
+      ["هود", 123, 221], ["يوسف", 111, 235], ["الرعد", 43, 249], ["إبراهيم", 52, 255], ["الحجر", 99, 262],
+      ["النحل", 128, 267], ["الإسراء", 111, 282], ["الكهف", 110, 293], ["مريم", 98, 305], ["طه", 135, 312],
+      ["الأنبياء", 112, 322], ["الحج", 78, 332], ["المؤمنون", 118, 342], ["النور", 64, 350], ["الفرقان", 77, 359],
+      ["الشعراء", 227, 367], ["النمل", 93, 377], ["القصص", 88, 385], ["العنكبوت", 69, 396], ["الروم", 60, 404],
+      ["لقمان", 34, 411], ["السجدة", 30, 415], ["الأحزاب", 73, 418], ["سبأ", 54, 428], ["فاطر", 45, 434],
+      ["يس", 83, 440], ["الصافات", 182, 446], ["ص", 88, 453], ["الزمر", 75, 458], ["غافر", 85, 467],
+      ["فصلت", 54, 477], ["الشورى", 53, 483], ["الزخرف", 89, 489], ["الدخان", 59, 496], ["الجاثية", 37, 499],
+      ["الأحقاف", 35, 502], ["محمد", 38, 507], ["الفتح", 29, 511], ["الحجرات", 18, 515], ["ق", 45, 518],
+      ["الذاريات", 60, 520], ["الطور", 49, 523], ["النجم", 62, 526], ["القمر", 55, 528], ["الرحمن", 78, 531],
+      ["الواقعة", 96, 534], ["الحديد", 29, 537], ["المجادلة", 22, 542], ["الحشر", 24, 545], ["الممتحنة", 13, 549],
+      ["الصف", 14, 551], ["الجمعة", 11, 553], ["المنافقون", 11, 554], ["التغابن", 18, 556], ["الطلاق", 12, 558],
+      ["التحريم", 12, 560], ["الملك", 30, 562], ["القلم", 52, 564], ["الحاقة", 52, 566], ["المعارج", 44, 568],
+      ["نوح", 28, 570], ["الجن", 28, 572], ["المزمل", 20, 574], ["المدثر", 56, 575], ["القيامة", 40, 577],
+      ["الإنسان", 31, 578], ["المرسلات", 50, 580], ["النبأ", 40, 582], ["النازعات", 46, 583], ["عبس", 42, 585],
+      ["التكوير", 29, 586], ["الانفطار", 19, 587], ["المطففين", 36, 587], ["الانشقاق", 25, 589], ["البروج", 22, 590],
+      ["الطارق", 17, 591], ["الأعلى", 19, 591], ["الغاشية", 26, 592], ["الفجر", 30, 593], ["البلد", 20, 594],
+      ["الشمس", 15, 595], ["الليل", 21, 595], ["الضحى", 11, 596], ["الشرح", 8, 596], ["التين", 8, 597],
+      ["العلق", 19, 597], ["القدر", 5, 598], ["البينة", 8, 598], ["الزلزلة", 8, 599], ["العاديات", 11, 599],
+      ["القارعة", 11, 600], ["التكاثر", 8, 600], ["العصر", 3, 601], ["الهمزة", 9, 601], ["الفيل", 5, 601],
+      ["قريش", 4, 602], ["الماعون", 7, 602], ["الكوثر", 3, 602], ["الكافرون", 6, 603], ["النصر", 3, 603],
+      ["المسد", 5, 603], ["الإخلاص", 4, 604], ["الفلق", 5, 604], ["الناس", 6, 604]
+    ];
+    const TOTAL_PAGES = 604;
+
+    // ===== SETTINGS =====
+    const DEFAULTS = { track1: true, track2: true, track3: true, reads: 1, listens: 2, cycleDays: 5, cyclePages: 10, intersection: 0, tadabburPages: 1, tadabburStart: 1, theme: 'dark' };
+    function getSettings() {
+      try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem('qt_settings') || '{}') } } catch (e) { return { ...DEFAULTS } }
+    }
+    function saveSetting() {
+      const s = getSettings();
+      s.track1 = document.getElementById('setTrack1').checked;
+      s.track2 = document.getElementById('setTrack2').checked;
+      s.track3 = document.getElementById('setTrack3').checked;
+      s.reads = +document.getElementById('setReads').value || 1;
+      s.listens = +document.getElementById('setListens').value || 2;
+      s.cycleDays = +document.getElementById('setCycleDays').value || 5;
+      s.cyclePages = +document.getElementById('setCyclePages').value || 10;
+      s.intersection = +document.getElementById('setIntersection').value || 0;
+      s.tadabburPages = +document.getElementById('setTadabburPages').value || 1;
+      s.tadabburStart = +document.getElementById('setTadabburStart').value || 1;
+      localStorage.setItem('qt_settings', JSON.stringify(s));
+      renderDashboard();
+    }
+    function loadSettings() {
+      const s = getSettings();
+      document.getElementById('setTrack1').checked = s.track1;
+      document.getElementById('setTrack2').checked = s.track2;
+      document.getElementById('setTrack3').checked = s.track3;
+      document.getElementById('setReads').value = s.reads;
+      document.getElementById('setListens').value = s.listens;
+      document.getElementById('setCycleDays').value = s.cycleDays;
+      document.getElementById('setCyclePages').value = s.cyclePages;
+      document.getElementById('setIntersection').value = s.intersection;
+      document.getElementById('setTadabburPages').value = s.tadabburPages;
+      document.getElementById('setTadabburStart').value = s.tadabburStart;
+    }
+
+    // ===== DATA HELPERS =====
+    function getData(key) { try { return JSON.parse(localStorage.getItem(key) || '[]') } catch (e) { return [] } }
+    function setData(key, val) { localStorage.setItem(key, JSON.stringify(val)) }
+    function today() { return new Date().toISOString().split('T')[0] }
+    function daysDiff(d1, d2) { return Math.floor((new Date(d1) - new Date(d2)) / (86400000)) }
+    function surahName(idx) { return SURAHS[idx] ? SURAHS[idx][0] : '' }
+    function surahAyahs(idx) { return SURAHS[idx] ? SURAHS[idx][1] : 0 }
+    function surahPage(idx) { return SURAHS[idx] ? SURAHS[idx][2] : 1 }
+    function getSurahEndPage(idx) { return idx < 113 ? SURAHS[idx + 1][2] - 1 : 604 }
+    function formatRange(s1, a1, s2, a2) {
+      if (s1 === s2) return surahName(s1) + ' : ' + a1 + ' → ' + a2;
+      return surahName(s1) + ' (' + a1 + ') → ' + surahName(s2) + ' (' + a2 + ')';
+    }
+    function getSurahsForPage(page) {
+      return SURAHS.filter((_, i) => surahPage(i) <= page && getSurahEndPage(i) >= page).map((_, i) => SURAHS.findIndex(s => s === _));
+    }
+
+    // ===== NAVIGATION =====
+    let currentPage = 'dashboard';
+    function showPage(name) {
+      currentPage = name;
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+      const pageMap = { dashboard: 'pageDashboard', session: 'pageSession', review: 'pageReview', tadabbur: 'pageTadabbur', stats: 'pageStats', settings: 'pageSettings' };
+      const tabMap = { dashboard: 'tabDashboard', session: 'tabSession', review: 'tabReview', tadabbur: 'tabTadabbur', stats: 'tabStats' };
+      document.getElementById(pageMap[name])?.classList.add('active');
+      document.getElementById(tabMap[name])?.classList.add('active');
+      if (name === 'dashboard') renderDashboard();
+      if (name === 'review') renderReviewPage();
+      if (name === 'tadabbur') renderTadabbur();
+      if (name === 'stats') renderStats();
+      if (name === 'settings') loadSettings();
+    }
+
+    // ===== THEME =====
+    function toggleTheme() {
+      const s = getSettings();
+      s.theme = s.theme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('qt_settings', JSON.stringify(s));
+      applyTheme();
+    }
+    function applyTheme() {
+      const s = getSettings();
+      document.body.classList.toggle('light', s.theme === 'light');
+      document.getElementById('themeBtn').innerHTML = s.theme === 'dark' ? ICONS.moon : ICONS.sun;
+      document.getElementById('settingsBtn').innerHTML = ICONS.gear;
+    }
+
+    // ===== POPULATE SURAH DROPDOWNS =====
+    function surahOptionsHtml() {
+      let h = '<option value="">اختر سورة</option>';
+      SURAHS.forEach((s, i) => { h += `<option value="${i}">${s[0]} (${s[1]} آية - ص${s[2]})</option>` });
+      return h;
+    }
+    function populateDropdowns() {
+      ['cycleSurahStart', 'cycleSurahEnd'].forEach(id => {
+        const sel = document.getElementById(id); if (!sel) return; sel.innerHTML = surahOptionsHtml();
+      });
+      // Initialize default slots
+      addSlot('new'); addSlot('old');
+    }
+
+    // ===== TOAST NOTIFICATION =====
+    function showToast(msg, isError) {
+      const t = document.createElement('div'); t.className = 'toast' + (isError ? ' error' : ''); t.textContent = msg;
+      document.body.appendChild(t); setTimeout(() => t.remove(), 2500);
+    }
+
+    // ===== DYNAMIC SLOT SYSTEM =====
+    let slotCounter = 0;
+    function addSlot(type) {
+      const container = document.getElementById(type === 'new' ? 'newSlots' : 'oldSlots');
+      const id = 'slot_' + (slotCounter++);
+      const div = document.createElement('div');
+      div.className = 'slot-entry'; div.id = id; div.dataset.type = type;
+      div.innerHTML = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+    <select class="slot-surah" onchange="onSlotSurahChange(this)" style="flex:1;padding:10px 12px;border:1.5px solid rgba(212,168,67,.2);border-radius:10px;background:var(--card2);color:var(--text);font-family:inherit;font-size:.95em">${surahOptionsHtml()}</select>
+    <button onclick="removeSlot('${id}')" style="background:none;border:none;color:var(--red);font-size:1.2em;cursor:pointer;padding:4px"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+  <div class="form-row" style="margin-bottom:4px">
+    <div class="form-group" style="margin-bottom:6px"><label>من آية</label><input type="number" class="slot-from" min="1" placeholder="مثال: 1"></div>
+    <div class="form-group" style="margin-bottom:6px"><label>إلى آية</label><input type="number" class="slot-to" min="1" placeholder="مثال: 30"></div>
+  </div>
+  <div class="ayah-hint slot-hint" style="margin-bottom:10px"></div>`;
+      container.appendChild(div);
+    }
+    function removeSlot(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const container = el.parentElement;
+      el.remove();
+      // Keep at least one slot
+      if (container.children.length === 0) {
+        const type = container.id === 'newSlots' ? 'new' : 'old';
+        addSlot(type);
+      }
+    }
+    function onSlotSurahChange(sel) {
+      const slot = sel.closest('.slot-entry');
+      const hint = slot.querySelector('.slot-hint');
+      const idx = +sel.value;
+      if (sel.value !== '' && SURAHS[idx]) {
+        hint.textContent = surahName(idx) + ': ' + surahAyahs(idx) + ' آية (ص' + surahPage(idx) + ' → ص' + getSurahEndPage(idx) + ')';
+      } else hint.textContent = '';
+    }
+    function getSlots(type) {
+      const container = document.getElementById(type === 'new' ? 'newSlots' : 'oldSlots');
+      const slots = [];
+      container.querySelectorAll('.slot-entry').forEach(el => {
+        const surah = el.querySelector('.slot-surah').value;
+        const from = el.querySelector('.slot-from').value;
+        const to = el.querySelector('.slot-to').value;
+        if (surah !== '' && from !== '' && to !== '') slots.push({ surah: +surah, from: +from, to: +to });
+      });
+      return slots;
+    }
+    function clearSlots(type) {
+      const container = document.getElementById(type === 'new' ? 'newSlots' : 'oldSlots');
+      container.innerHTML = '';
+      addSlot(type);
+    }
+
+    // ===== TRACK 1: SESSION LOGGING & REVISION =====
+    function saveSession() {
+      const date = document.getElementById('sessionDate').value || today();
+      const newSlots = getSlots('new');
+      const oldSlots = getSlots('old');
+
+      if (!newSlots.length && !oldSlots.length) { showToast('أدخل بيانات الحفظ أو المراجعة أولاً', true); return }
+
+      // Validate
+      for (const s of newSlots) {
+        if (s.from < 1 || s.to < 1) { showToast('خطأ: أرقام الآيات يجب أن تكون 1 أو أكبر', true); return }
+      }
+      for (const s of oldSlots) {
+        if (s.from < 1 || s.to < 1) { showToast('خطأ: أرقام الآيات يجب أن تكون 1 أو أكبر', true); return }
+      }
+
+      const revisions = getData('qt_revisions');
+      newSlots.forEach(s => {
+        mergeRevision(revisions, { type: 'new', surahStart: s.surah, ayahStart: s.from, surahEnd: s.surah, ayahEnd: s.to, date, expires: addDays(date, 7) });
+      });
+      oldSlots.forEach(s => {
+        mergeRevision(revisions, { type: 'old', surahStart: s.surah, ayahStart: s.from, surahEnd: s.surah, ayahEnd: s.to, date, expires: addDays(date, 7) });
+      });
+
+      setData('qt_revisions', revisions);
+      recordActivity(date);
+      let msg = 'تم الحفظ: ';
+      if (newSlots.length) msg += newSlots.length + ' حفظ جديد';
+      if (newSlots.length && oldSlots.length) msg += ' + ';
+      if (oldSlots.length) msg += oldSlots.length + ' مراجعة';
+      showToast(msg);
+      clearSlots('new'); clearSlots('old');
+      setTimeout(() => showPage('dashboard'), 800);
+    }
+
+    function mergeRevision(arr, item) {
+      // check for overlapping items of same type and merge
+      for (let i = 0; i < arr.length; i++) {
+        const r = arr[i];
+        if (r.type === item.type && r.surahStart === item.surahStart && r.surahEnd === item.surahEnd && !r.revised) {
+          if (rangesOverlap(r.ayahStart, r.ayahEnd, item.ayahStart, item.ayahEnd)) {
+            r.ayahStart = Math.min(r.ayahStart, item.ayahStart);
+            r.ayahEnd = Math.max(r.ayahEnd, item.ayahEnd);
+            r.expires = item.expires > r.expires ? item.expires : r.expires;
+            return;
+          }
+        }
+      }
+      arr.push({ ...item, id: Date.now() + '_' + Math.random().toString(36).slice(2, 6), revised: false });
+    }
+
+    function rangesOverlap(s1, e1, s2, e2) { return s1 <= e2 && s2 <= e1 }
+    function addDays(d, n) { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt.toISOString().split('T')[0] }
+
+    function markRevised(id) {
+      const revs = getData('qt_revisions');
+      const r = revs.find(x => x.id === id);
+      if (r) { r.revised = true; r.revisedDate = today() }
+      setData('qt_revisions', revs);
+      recordActivity(today());
+      renderDashboard();
+    }
+
+    // ===== TRACK 2: REVIEW CYCLES =====
+    function toggleCycleMode() {
+      const mode = document.getElementById('cycleMode').value;
+      document.getElementById('cyclePagesMode').style.display = mode === 'pages' ? 'block' : 'none';
+      document.getElementById('cycleSurahMode').style.display = mode === 'surah' ? 'block' : 'none';
+    }
+    function createCycle() {
+      const s = getSettings();
+      const mode = document.getElementById('cycleMode').value;
+      let pageStart, pageEnd, label;
+      if (mode === 'pages') {
+        pageStart = +document.getElementById('cyclePageStart').value;
+        pageEnd = +document.getElementById('cyclePageEnd').value;
+        if (!pageStart || !pageEnd || pageStart > pageEnd || pageEnd > 604) { alert('أدخل نطاق صفحات صحيح (1-604)'); return }
+        label = 'صفحات ' + pageStart + ' → ' + pageEnd;
+      } else {
+        const ss = +document.getElementById('cycleSurahStart').value;
+        const se = +document.getElementById('cycleSurahEnd').value;
+        if (isNaN(ss) || isNaN(se)) { alert('اختر السور'); return }
+        pageStart = surahPage(ss);
+        pageEnd = getSurahEndPage(se);
+        label = surahName(ss) + ' → ' + surahName(se);
+      }
+      const cycle = {
+        id: Date.now(), label, pageStart, pageEnd, totalDays: s.cycleDays, currentDay: 1,
+        dailyProgress: [], reads: s.reads, listens: s.listens, completed: false, createdDate: today()
+      };
+      // init first day
+      cycle.dailyProgress.push({ day: 1, readsCompleted: 0, listensCompleted: 0, complete: false });
+      const cycles = getData('qt_cycles');
+      cycles.push(cycle);
+      setData('qt_cycles', cycles);
+      renderReviewPage();
+    }
+
+    function markCycleRead(cycleId, extra) {
+      const cycles = getData('qt_cycles');
+      const c = cycles.find(x => x.id === cycleId);
+      if (!c) return;
+      const dp = c.dailyProgress[c.currentDay - 1];
+      if (extra) dp.readsCompleted++;
+      else dp.readsCompleted = Math.min(dp.readsCompleted + 1, c.reads);
+      checkDayComplete(c);
+      setData('qt_cycles', cycles);
+      recordActivity(today());
+      renderReviewPage();
+    }
+    function markCycleListen(cycleId, extra) {
+      const cycles = getData('qt_cycles');
+      const c = cycles.find(x => x.id === cycleId);
+      if (!c) return;
+      const dp = c.dailyProgress[c.currentDay - 1];
+      if (extra) dp.listensCompleted++;
+      else dp.listensCompleted = Math.min(dp.listensCompleted + 1, c.listens);
+      checkDayComplete(c);
+      setData('qt_cycles', cycles);
+      recordActivity(today());
+      renderReviewPage();
+    }
+    function checkDayComplete(c) {
+      const dp = c.dailyProgress[c.currentDay - 1];
+      if (dp.readsCompleted >= c.reads && dp.listensCompleted >= c.listens) dp.complete = true;
+    }
+    function advanceCycleDay(cycleId) {
+      const cycles = getData('qt_cycles');
+      const c = cycles.find(x => x.id === cycleId);
+      if (!c) return;
+      if (c.currentDay >= c.totalDays) { c.completed = true }
+      else { c.currentDay++; c.dailyProgress.push({ day: c.currentDay, readsCompleted: 0, listensCompleted: 0, complete: false }) }
+      setData('qt_cycles', cycles);
+      renderReviewPage();
+    }
+    function deleteCycle(cycleId) {
+      if (!confirm('حذف هذه الدورة؟')) return;
+      let cycles = getData('qt_cycles');
+      cycles = cycles.filter(x => x.id !== cycleId);
+      setData('qt_cycles', cycles);
+      renderReviewPage();
+    }
+
+    // ===== TRACK 3: TADABBUR =====
+    function getTadabburState() {
+      try { return JSON.parse(localStorage.getItem('qt_tadabbur') || 'null') || { currentPage: getSettings().tadabburStart, completedPages: [] } }
+      catch (e) { return { currentPage: getSettings().tadabburStart, completedPages: [] } }
+    }
+    function saveTadabburState(st) { localStorage.setItem('qt_tadabbur', JSON.stringify(st)) }
+    function markTadabburDone() {
+      const st = getTadabburState();
+      const s = getSettings();
+      if (!st.completedPages.includes(st.currentPage)) st.completedPages.push(st.currentPage);
+      st.currentPage = Math.min(st.currentPage + s.tadabburPages, TOTAL_PAGES);
+      saveTadabburState(st);
+      recordActivity(today());
+      renderTadabbur();
+      renderDashboard();
+    }
+
+    // ===== ACTIVITY / STREAK =====
+    function recordActivity(date) {
+      const acts = getData('qt_activity');
+      if (!acts.includes(date)) acts.push(date);
+      setData('qt_activity', acts);
+    }
+    function getStreak() {
+      const acts = getData('qt_activity').sort();
+      if (!acts.length) return 0;
+      let streak = 0, d = today();
+      for (let i = 0; i < 366; i++) {
+        if (acts.includes(d)) { streak++; d = addDays(d, -1) }
+        else break;
+      }
+      return streak;
+    }
+
+    // ===== CLEANUP EXPIRED =====
+    function cleanupExpired() {
+      let revs = getData('qt_revisions');
+      revs = revs.filter(r => r.expires >= today() || r.revised);
+      setData('qt_revisions', revs);
+    }
+
+    // ===== RENDER DASHBOARD =====
+    function renderDashboard() {
+      const s = getSettings();
+      const revs = getData('qt_revisions').filter(r => !r.revised && r.expires >= today());
+      const cycles = getData('qt_cycles').filter(c => !c.completed);
+      const tad = getTadabburState();
+      let hasContent = false;
+
+      // Streak
+      const streak = getStreak();
+      const streakCard = document.getElementById('streakCard');
+      if (streak > 0) { streakCard.style.display = 'block'; document.getElementById('streakCount').textContent = streak }
+      else streakCard.style.display = 'none';
+
+      // Track 1
+      const t1 = document.getElementById('track1Dashboard');
+      if (s.track1 && revs.length) {
+        hasContent = true;
+        let h = '<div class="card"><div class="card-title"><span class="icon">' + ICONS.book + '</span> مراجعة اليوم</div>';
+        revs.forEach(r => {
+          const daysLeft = daysDiff(r.expires, today());
+          h += `<div class="revision-item">
+        <div class="info"><div class="surah">${formatRange(r.surahStart, r.ayahStart, r.surahEnd, r.ayahEnd)}</div>
+        <div class="ayah">${r.type === 'new' ? 'حفظ جديد' : 'مراجعة قديمة'}</div>
+        <div class="days-left">${ICONS.clock} ${daysLeft} أيام متبقية</div></div>
+        <button class="check-btn" onclick="markRevised('${r.id}')">${ICONS.check}</button></div>`;
+        });
+        h += '</div>'; t1.innerHTML = h;
+      } else t1.innerHTML = '';
+
+      // Track 2
+      const t2 = document.getElementById('track2Dashboard');
+      if (s.track2 && cycles.length) {
+        hasContent = true;
+        let h = '';
+        cycles.forEach(c => {
+          const dp = c.dailyProgress[c.currentDay - 1] || { readsCompleted: 0, listensCompleted: 0 };
+          const pct = Math.round(((c.currentDay - 1) / c.totalDays) * 100);
+          h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.refresh}</span> ${c.label}</div>
+        <div style="color:var(--text2);font-size:.9em;margin-bottom:8px">اليوم ${c.currentDay} / ${c.totalDays}</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="counter-row"><label>القراءة</label><div class="counter-circles">`;
+          for (let i = 0; i < Math.max(c.reads, dp.readsCompleted); i++) {
+            const filled = i < dp.readsCompleted ? 'filled' : '';
+            const extra = i >= c.reads ? 'extra' : '';
+            h += `<div class="counter-circle ${filled} ${extra}" onclick="markCycleRead(${c.id},${i >= c.reads})">${i + 1}</div>`;
+          }
+          h += `<div class="counter-circle extra" onclick="markCycleRead(${c.id},true)">+</div></div></div>`;
+          h += `<div class="counter-row"><label>الاستماع</label><div class="counter-circles">`;
+          for (let i = 0; i < Math.max(c.listens, dp.listensCompleted); i++) {
+            const filled = i < dp.listensCompleted ? 'filled' : '';
+            const extra = i >= c.listens ? 'extra' : '';
+            h += `<div class="counter-circle ${filled} ${extra}" onclick="markCycleListen(${c.id},${i >= c.listens})">${i + 1}</div>`;
+          }
+          h += `<div class="counter-circle extra" onclick="markCycleListen(${c.id},true)">+</div></div></div>`;
+          if (dp.complete) h += `<button class="btn btn-success btn-sm btn-block" onclick="advanceCycleDay(${c.id})" style="margin-top:8px">${c.currentDay >= c.totalDays ? ICONS.checkCircle + ' إنهاء الدورة' : ICONS.skipForward + ' اليوم التالي'}</button>`;
+          h += `</div>`;
+        });
+        t2.innerHTML = h;
+      } else t2.innerHTML = '';
+
+      // Track 3
+      const t3 = document.getElementById('track3Dashboard');
+      if (s.track3) {
+        hasContent = true;
+        const surahs = getSurahsForPage(tad.currentPage);
+        const surahInfo = surahs.length ? surahs.map(i => surahName(i)).join(' / ') : '';
+        t3.innerHTML = `<div class="card"><div class="card-title"><span class="icon">${ICONS.thought}</span> تدبر اليوم</div>
+      <div class="tadabbur-page-display"><div class="page-num">${tad.currentPage}</div>
+      <div class="page-label">صفحة ${tad.currentPage} من ${TOTAL_PAGES}${surahInfo ? ' — ' + surahInfo : ''}</div></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(tad.completedPages.length / TOTAL_PAGES * 100)}%"></div></div>
+      <div style="text-align:center;color:var(--text2);font-size:.85em;margin:5px 0">${tad.completedPages.length} / ${TOTAL_PAGES} صفحة</div>
+      <button class="btn btn-primary btn-block" onclick="markTadabburDone()">${ICONS.checkCircle} تم التدبر</button></div>`;
+      } else t3.innerHTML = '';
+
+      document.getElementById('emptyDashboard').style.display = hasContent ? 'none' : 'block';
+    }
+
+    // ===== RENDER REVIEW PAGE =====
+    function renderReviewPage() {
+      const cycles = getData('qt_cycles');
+      const active = cycles.filter(c => !c.completed);
+      const completed = cycles.filter(c => c.completed);
+      const el = document.getElementById('activeCycle');
+      if (!active.length && !completed.length) { el.innerHTML = '<div class="empty-state"><div class="empty-icon">' + ICONS.refresh + '</div><p>لا توجد دورات مراجعة<br>أنشئ دورة جديدة</p></div>'; return }
+      let h = '';
+      active.forEach(c => {
+        const dp = c.dailyProgress[c.currentDay - 1] || { readsCompleted: 0, listensCompleted: 0 };
+        const pct = Math.round(((c.currentDay - 1) / c.totalDays) * 100);
+        h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.refresh}</span> ${c.label}
+      <button class="btn btn-danger btn-sm" style="margin-right:auto;font-size:.75em" onclick="deleteCycle(${c.id})">${ICONS.trash}</button></div>
+      <div style="color:var(--text2);font-size:.9em">اليوم ${c.currentDay} / ${c.totalDays}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="counter-row"><label>القراءة</label><div class="counter-circles">`;
+        for (let i = 0; i < Math.max(c.reads, dp.readsCompleted); i++) {
+          h += `<div class="counter-circle ${i < dp.readsCompleted ? 'filled' : ''} ${i >= c.reads ? 'extra' : ''}" onclick="markCycleRead(${c.id},${i >= c.reads})">${i + 1}</div>`;
+        }
+        h += `<div class="counter-circle extra" onclick="markCycleRead(${c.id},true)">+</div></div></div>`;
+        h += `<div class="counter-row"><label>الاستماع</label><div class="counter-circles">`;
+        for (let i = 0; i < Math.max(c.listens, dp.listensCompleted); i++) {
+          h += `<div class="counter-circle ${i < dp.listensCompleted ? 'filled' : ''} ${i >= c.listens ? 'extra' : ''}" onclick="markCycleListen(${c.id},${i >= c.listens})">${i + 1}</div>`;
+        }
+        h += `<div class="counter-circle extra" onclick="markCycleListen(${c.id},true)">+</div></div></div>`;
+        if (dp.complete) h += `<button class="btn btn-success btn-block" onclick="advanceCycleDay(${c.id})" style="margin-top:8px">${c.currentDay >= c.totalDays ? ICONS.checkCircle + ' إنهاء الدورة' : ICONS.skipForward + ' اليوم التالي'}</button>`;
+        h += `</div>`;
+      });
+      if (completed.length) {
+        h += '<div class="card"><div class="card-title"><span class="icon">' + ICONS.checkCircle + '</span> الدورات المكتملة</div>';
+        completed.slice(-5).reverse().forEach(c => { h += `<div class="revision-item"><div class="info"><div class="surah">${c.label}</div><div class="ayah">${c.createdDate}</div></div><button class="btn btn-danger btn-sm" onclick="deleteCycle(${c.id})">${ICONS.trash}</button></div>` });
+        h += '</div>';
+      }
+      el.innerHTML = h;
+    }
+
+    // ===== RENDER TADABBUR =====
+    function renderTadabbur() {
+      const tad = getTadabburState(); const s = getSettings();
+      const surahs = [];
+      for (let i = 0; i < SURAHS.length; i++) { if (surahPage(i) <= tad.currentPage && getSurahEndPage(i) >= tad.currentPage) surahs.push(i) }
+      const surahInfo = surahs.map(i => surahName(i)).join(' / ');
+      document.getElementById('tadabburContent').innerHTML = `
+    <div class="card"><div class="card-title"><span class="icon">${ICONS.thought}</span> التدبر اليومي</div>
+    <div class="tadabbur-page-display"><div class="page-num">${tad.currentPage}</div>
+    <div class="page-label">صفحة ${tad.currentPage} من ${TOTAL_PAGES}</div>
+    <div style="color:var(--gold);margin-top:5px">${surahInfo}</div></div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(tad.completedPages.length / TOTAL_PAGES * 100)}%"></div></div>
+    <div style="text-align:center;color:var(--text2);font-size:.85em;margin:8px 0">تم تدبر ${tad.completedPages.length} من ${TOTAL_PAGES} صفحة</div>
+    <button class="btn btn-primary btn-block" onclick="markTadabburDone()">${ICONS.checkCircle} تم التدبر</button></div>
+    <div class="card"><div class="card-title"><span class="icon">${ICONS.barChart}</span> إحصائيات التدبر</div>
+    <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value">${tad.completedPages.length}</div><div class="stat-label">صفحات مكتملة</div></div>
+    <div class="stat-card"><div class="stat-value">${TOTAL_PAGES - tad.completedPages.length}</div><div class="stat-label">صفحات متبقية</div></div>
+    <div class="stat-card"><div class="stat-value">${Math.round(tad.completedPages.length / TOTAL_PAGES * 100)}%</div><div class="stat-label">نسبة الإنجاز</div></div>
+    <div class="stat-card"><div class="stat-value">${s.tadabburPages}</div><div class="stat-label">صفحات يومياً</div></div>
+    </div></div>`;
+    }
+
+    // ===== RENDER STATS =====
+    function renderStats() {
+      const revs = getData('qt_revisions');
+      const cycles = getData('qt_cycles');
+      const tad = getTadabburState();
+      const totalSessions = revs.length;
+      const activeRevs = revs.filter(r => !r.revised && r.expires >= today()).length;
+      const completedRevs = revs.filter(r => r.revised).length;
+      const totalCycles = cycles.length;
+      const completedCycles = cycles.filter(c => c.completed).length;
+      const streak = getStreak();
+
+      // Surah frequency
+      const surahFreq = {};
+      revs.forEach(r => {
+        for (let i = r.surahStart; i <= r.surahEnd; i++) { surahFreq[i] = (surahFreq[i] || 0) + 1 }
+      });
+      const topSurahs = Object.entries(surahFreq).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+      let h = `<div class="card"><div class="card-title"><span class="icon">${ICONS.barChart}</span> الإحصائيات العامة</div>
+    <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value">${streak}</div><div class="stat-label">${ICONS.flame} أيام متتالية</div></div>
+    <div class="stat-card"><div class="stat-value">${totalSessions}</div><div class="stat-label">${ICONS.edit} جلسات مسجلة</div></div>
+    <div class="stat-card"><div class="stat-value">${activeRevs}</div><div class="stat-label">${ICONS.book} مراجعات نشطة</div></div>
+    <div class="stat-card"><div class="stat-value">${completedRevs}</div><div class="stat-label">${ICONS.checkCircle} مراجعات مكتملة</div></div>
+    <div class="stat-card"><div class="stat-value">${completedCycles}</div><div class="stat-label">${ICONS.refresh} دورات مكتملة</div></div>
+    <div class="stat-card"><div class="stat-value">${tad.completedPages.length}</div><div class="stat-label">${ICONS.thought} صفحات تدبر</div></div>
+    </div></div>`;
+
+      if (topSurahs.length) {
+        h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.star}</span> أكثر السور مراجعة</div>`;
+        topSurahs.forEach(([idx, count]) => {
+          const pct = Math.round(count / topSurahs[0][1] * 100);
+          h += `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.9em;margin-bottom:3px"><span>${surahName(+idx)}</span><span style="color:var(--gold)">${count} مرات</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>`;
+        });
+        h += '</div>';
+      }
+      document.getElementById('statsContent').innerHTML = h;
+    }
+
+    // ===== PWA INSTALL =====
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBanner').classList.add('show') });
+    function installApp() { if (deferredPrompt) { deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; document.getElementById('installBanner').classList.remove('show') }) } }
+
+    // ===== DELETE DATA =====
+    function deleteDataType(key, label) {
+      if (!confirm('هل أنت متأكد من حذف ' + label + '؟')) return;
+      localStorage.removeItem(key);
+      showToast('تم حذف ' + label);
+      renderDashboard();
+    }
+    function deleteAllData() {
+      if (!confirm('هل أنت متأكد من حذف جميع البيانات؟')) return;
+      localStorage.clear();
+      location.reload();
+    }
+
+    // ===== INIT ICONS =====
+    function initIcons() {
+      const map = {
+        settingsBtn: ICONS.gear,
+        settingsIcon: ICONS.gear,
+        sessionIcon: ICONS.edit,
+        newCycleIcon: ICONS.refresh,
+        emptyIcon: ICONS.bookOpen,
+        streakBadge: ICONS.flame + ' <span id="streakCount">0</span> يوم متتالي',
+        newMemTitle: ICONS.sparkles + ' الحفظ الجديد',
+        oldRevTitle: ICONS.bookOpen + ' المراجعة القديمة',
+        saveSessionBtn: ICONS.save + ' حفظ الجلسة',
+        createCycleBtn: ICONS.plusCircle + ' إنشاء الدورة',
+        dataIcon: ICONS.database,
+        revSettingsIcon: ICONS.bookOpen,
+        tadSettingsIcon: ICONS.thought,
+        setTrack1Icon: ICONS.book,
+        setTrack2Icon: ICONS.bookOpen,
+        setTrack3Icon: ICONS.thought,
+        tabIconHome: ICONS.home,
+        tabIconSession: ICONS.edit,
+        tabIconReview: ICONS.refresh,
+        tabIconTadabbur: ICONS.thought,
+        tabIconStats: ICONS.barChart,
+        delRevIcon: ICONS.trash,
+        delCycIcon: ICONS.trash,
+        delTadIcon: ICONS.trash,
+        delActIcon: ICONS.trash,
+        delAllIcon: ICONS.trash,
+      };
+      for (const [id, html] of Object.entries(map)) {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+      }
+    }
+
+    // ===== INIT =====
+    document.addEventListener('DOMContentLoaded', () => {
+      initIcons(); applyTheme(); populateDropdowns(); cleanupExpired(); loadSettings();
+      document.getElementById('sessionDate').value = today();
+      renderDashboard();
+      if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(e => console.log('SW reg failed:', e)) }
+    });
+  </script>
+</body>
+
+</html>
