@@ -51,14 +51,14 @@
     }
 
     body.light {
-      --bg: #f5f0e8;
-      --bg2: #ede4d3;
-      --bg3: #d4c4a8;
+      --bg: #ebe5d9;
+      --bg2: #ddd4c1;
+      --bg3: #c4b394;
       --card: #fff;
-      --card2: #f9f3ea;
-      --text: #2c2c2c;
-      --text2: #6b6b6b;
-      --shadow: 0 4px 20px rgba(0, 0, 0, .08)
+      --card2: #f2ead9;
+      --text: #1f1f1f;
+      --text2: #555555;
+      --shadow: 0 4px 20px rgba(0, 0, 0, .12)
     }
 
     .header {
@@ -780,10 +780,153 @@
       background: var(--red);
       color: #fff;
     }
+
+    /* Onboarding walkthrough */
+    .onboarding-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .75);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn .4s ease;
+    }
+
+    .onboarding-overlay.hidden {
+      display: none;
+    }
+
+    .onboarding-card {
+      background: var(--card);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 28px 22px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, .4);
+      animation: slideUp .4s ease;
+      text-align: center;
+    }
+
+    .onboarding-card h2 {
+      font-family: 'Amiri', serif;
+      font-size: 1.5em;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+
+    .onboarding-card .ob-subtitle {
+      color: var(--text2);
+      font-size: .9em;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .onboarding-card .ob-verse {
+      font-family: 'Amiri', serif;
+      font-size: 1.15em;
+      color: var(--gold);
+      margin-bottom: 20px;
+      line-height: 1.8;
+      padding: 12px;
+      background: rgba(212, 168, 67, .08);
+      border-radius: 12px;
+      border: 1px solid rgba(212, 168, 67, .15);
+    }
+
+    .ob-steps {
+      text-align: right;
+      margin-bottom: 20px;
+    }
+
+    .ob-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .05);
+    }
+
+    .ob-step:last-child {
+      border-bottom: none;
+    }
+
+    .ob-step-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+      border-radius: 50%;
+      background: rgba(212, 168, 67, .12);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1em;
+    }
+
+    .ob-step-content h3 {
+      font-family: 'Amiri', serif;
+      font-size: 1.05em;
+      color: var(--gold);
+      margin-bottom: 3px;
+    }
+
+    .ob-step-content p {
+      font-size: .85em;
+      color: var(--text2);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .ob-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .ob-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--card2);
+      transition: all .3s;
+    }
+
+    .ob-dot.active {
+      background: var(--gold);
+      width: 24px;
+      border-radius: 4px;
+    }
+
+    .ob-nav {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .ob-nav .btn {
+      min-width: 100px;
+    }
   </style>
 </head>
 
 <body>
+
+  <!-- Onboarding Walkthrough -->
+  <div class="onboarding-overlay hidden" id="onboarding">
+    <div class="onboarding-card">
+      <div id="obContent"></div>
+      <div class="ob-dots" id="obDots"></div>
+      <div class="ob-nav">
+        <button class="btn btn-outline btn-sm" id="obPrev" onclick="obNav(-1)">السابق</button>
+        <button class="btn btn-primary btn-sm" id="obNext" onclick="obNav(1)">التالي</button>
+      </div>
+    </div>
+  </div>
 
   <div class="header">
     <h1>﷽</h1>
@@ -822,7 +965,7 @@
         <div class="card-title"><span class="icon" id="sessionIcon"></span> تسجيل جلسة جديدة</div>
         <div class="form-group">
           <label>التاريخ</label>
-          <input type="date" id="sessionDate">
+          <input type="text" id="sessionDate" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" onclick="this.showPicker?.()" onfocus="formatDateInput(this)" oninput="formatDateInput(this)">
         </div>
 
         <!-- New Memorization Slots -->
@@ -862,10 +1005,11 @@
         <div id="cyclePagesMode">
           <div class="form-row">
             <div class="form-group"><label>من صفحة</label><input type="number" id="cyclePageStart" min="1" max="604"
-                placeholder="1"></div>
+                placeholder="1" oninput="updatePagePreview()"></div>
             <div class="form-group"><label>إلى صفحة</label><input type="number" id="cyclePageEnd" min="1" max="604"
-                placeholder="10"></div>
+                placeholder="10" oninput="updatePagePreview()"></div>
           </div>
+          <div class="ayah-hint" id="cyclePagePreview"></div>
         </div>
         <div id="cycleSurahMode" style="display:none">
           <div class="form-row">
@@ -1010,7 +1154,7 @@
     const TOTAL_PAGES = 604;
 
     // ===== SETTINGS =====
-    const DEFAULTS = { track1: true, track2: true, track3: true, reads: 1, listens: 2, cycleDays: 5, cyclePages: 10, intersection: 0, tadabburPages: 1, tadabburStart: 1, theme: 'dark' };
+    const DEFAULTS = { track1: true, track2: true, track3: false, reads: 1, listens: 2, cycleDays: 5, cyclePages: 10, intersection: 0, tadabburPages: 1, tadabburStart: 1, theme: 'dark' };
     function getSettings() {
       try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem('qt_settings') || '{}') } } catch (e) { return { ...DEFAULTS } }
     }
@@ -1046,8 +1190,17 @@
     // ===== DATA HELPERS =====
     function getData(key) { try { return JSON.parse(localStorage.getItem(key) || '[]') } catch (e) { return [] } }
     function setData(key, val) { localStorage.setItem(key, JSON.stringify(val)) }
-    function today() { return new Date().toISOString().split('T')[0] }
-    function daysDiff(d1, d2) { return Math.floor((new Date(d1) - new Date(d2)) / (86400000)) }
+    function today() { const d = new Date(); return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear() }
+    function parseDMY(s) { const p = s.split('/'); return new Date(+p[2], +p[1]-1, +p[0]) }
+    function formatDateInput(el) {
+      let v = el.value.replace(/[^0-9]/g, '');
+      if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
+      if (v.length > 5) v = v.slice(0,5) + '/' + v.slice(5);
+      if (v.length > 10) v = v.slice(0,10);
+      el.value = v;
+    }
+    function daysDiff(d1, d2) { return Math.floor((parseDMY(d1) - parseDMY(d2)) / 86400000) }
+    function addDays(d, n) { const dt = parseDMY(d); dt.setDate(dt.getDate() + n); return String(dt.getDate()).padStart(2,'0') + '/' + String(dt.getMonth()+1).padStart(2,'0') + '/' + dt.getFullYear() }
     function surahName(idx) { return SURAHS[idx] ? SURAHS[idx][0] : '' }
     function surahAyahs(idx) { return SURAHS[idx] ? SURAHS[idx][1] : 0 }
     function surahPage(idx) { return SURAHS[idx] ? SURAHS[idx][2] : 1 }
@@ -1168,6 +1321,7 @@
     // ===== TRACK 1: SESSION LOGGING & REVISION =====
     function saveSession() {
       const date = document.getElementById('sessionDate').value || today();
+      if (!/^\d{2}\/\d{2}\/\d{4}$/.test(date)) { showToast('أدخل تاريخ صحيح (dd/mm/yyyy)', true); return }
       const newSlots = getSlots('new');
       const oldSlots = getSlots('old');
 
@@ -1208,7 +1362,7 @@
           if (rangesOverlap(r.ayahStart, r.ayahEnd, item.ayahStart, item.ayahEnd)) {
             r.ayahStart = Math.min(r.ayahStart, item.ayahStart);
             r.ayahEnd = Math.max(r.ayahEnd, item.ayahEnd);
-            r.expires = item.expires > r.expires ? item.expires : r.expires;
+            r.expires = parseDMY(item.expires) > parseDMY(r.expires) ? item.expires : r.expires;
             return;
           }
         }
@@ -1217,7 +1371,6 @@
     }
 
     function rangesOverlap(s1, e1, s2, e2) { return s1 <= e2 && s2 <= e1 }
-    function addDays(d, n) { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt.toISOString().split('T')[0] }
 
     function markRevised(id) {
       const revs = getData('qt_revisions');
@@ -1233,6 +1386,29 @@
       const mode = document.getElementById('cycleMode').value;
       document.getElementById('cyclePagesMode').style.display = mode === 'pages' ? 'block' : 'none';
       document.getElementById('cycleSurahMode').style.display = mode === 'surah' ? 'block' : 'none';
+    }
+    function updatePagePreview() {
+      const el = document.getElementById('cyclePagePreview');
+      const ps = +document.getElementById('cyclePageStart').value;
+      const pe = +document.getElementById('cyclePageEnd').value;
+      if (!ps && !pe) { el.textContent = ''; return }
+      const parts = [];
+      if (ps >= 1 && ps <= 604) {
+        const s = getSurahsForPage(ps).map(i => surahName(i)).join(' / ');
+        parts.push('صفحة ' + ps + ': ' + (s || '—'));
+      }
+      if (pe >= 1 && pe <= 604 && pe !== ps) {
+        const s = getSurahsForPage(pe).map(i => surahName(i)).join(' / ');
+        parts.push('صفحة ' + pe + ': ' + (s || '—'));
+      }
+      if (ps >= 1 && pe >= 1 && ps <= 604 && pe <= 604 && pe >= ps) {
+        const allSurahs = new Set();
+        for (let i = 0; i < SURAHS.length; i++) {
+          if (getSurahEndPage(i) >= ps && surahPage(i) <= pe) allSurahs.add(surahName(i));
+        }
+        if (allSurahs.size > 0) parts.push('السور: ' + [...allSurahs].join('، '));
+      }
+      el.textContent = parts.join(' | ');
     }
     function createCycle() {
       const s = getSettings();
@@ -1345,14 +1521,14 @@
     // ===== CLEANUP EXPIRED =====
     function cleanupExpired() {
       let revs = getData('qt_revisions');
-      revs = revs.filter(r => r.expires >= today() || r.revised);
+      revs = revs.filter(r => parseDMY(r.expires) >= parseDMY(today()) || r.revised);
       setData('qt_revisions', revs);
     }
 
     // ===== RENDER DASHBOARD =====
     function renderDashboard() {
       const s = getSettings();
-      const revs = getData('qt_revisions').filter(r => !r.revised && r.expires >= today());
+      const revs = getData('qt_revisions').filter(r => !r.revised && parseDMY(r.expires) >= parseDMY(today()));
       const cycles = getData('qt_cycles').filter(c => !c.completed);
       const tad = getTadabburState();
       let hasContent = false;
@@ -1387,7 +1563,10 @@
         cycles.forEach(c => {
           const dp = c.dailyProgress[c.currentDay - 1] || { readsCompleted: 0, listensCompleted: 0 };
           const pct = Math.round(((c.currentDay - 1) / c.totalDays) * 100);
+          const cSurahs = []; for (let i = 0; i < SURAHS.length; i++) { if (getSurahEndPage(i) >= c.pageStart && surahPage(i) <= c.pageEnd) cSurahs.push(surahName(i)) }
+          const cSurahHint = cSurahs.length ? cSurahs.join('، ') : '';
           h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.refresh}</span> ${c.label}</div>
+        ${cSurahHint ? `<div style="color:var(--gold);font-size:.8em;margin-bottom:6px;opacity:.8">${cSurahHint}</div>` : ''}
         <div style="color:var(--text2);font-size:.9em;margin-bottom:8px">اليوم ${c.currentDay} / ${c.totalDays}</div>
         <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
         <div class="counter-row"><label>القراءة</label><div class="counter-circles">`;
@@ -1438,8 +1617,11 @@
       active.forEach(c => {
         const dp = c.dailyProgress[c.currentDay - 1] || { readsCompleted: 0, listensCompleted: 0 };
         const pct = Math.round(((c.currentDay - 1) / c.totalDays) * 100);
+        const rSurahs = []; for (let i = 0; i < SURAHS.length; i++) { if (getSurahEndPage(i) >= c.pageStart && surahPage(i) <= c.pageEnd) rSurahs.push(surahName(i)) }
+        const rSurahHint = rSurahs.length ? rSurahs.join('، ') : '';
         h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.refresh}</span> ${c.label}
       <button class="btn btn-danger btn-sm" style="margin-right:auto;font-size:.75em" onclick="deleteCycle(${c.id})">${ICONS.trash}</button></div>
+      ${rSurahHint ? `<div style="color:var(--gold);font-size:.8em;margin-bottom:6px;opacity:.8">${rSurahHint}</div>` : ''}
       <div style="color:var(--text2);font-size:.9em">اليوم ${c.currentDay} / ${c.totalDays}</div>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div class="counter-row"><label>القراءة</label><div class="counter-circles">`;
@@ -1491,39 +1673,125 @@
       const revs = getData('qt_revisions');
       const cycles = getData('qt_cycles');
       const tad = getTadabburState();
-      const totalSessions = revs.length;
-      const activeRevs = revs.filter(r => !r.revised && r.expires >= today()).length;
+      const s = getSettings();
+      const streak = getStreak();
+      const activeDays = getData('qt_activity').length;
+
+      // Revision stats
+      const activeRevs = revs.filter(r => !r.revised && parseDMY(r.expires) >= parseDMY(today())).length;
       const completedRevs = revs.filter(r => r.revised).length;
       const totalCycles = cycles.length;
       const completedCycles = cycles.filter(c => c.completed).length;
-      const streak = getStreak();
+      const activeCycles = cycles.filter(c => !c.completed).length;
 
-      // Surah frequency
-      const surahFreq = {};
-      revs.forEach(r => {
-        for (let i = r.surahStart; i <= r.surahEnd; i++) { surahFreq[i] = (surahFreq[i] || 0) + 1 }
+      // Compute total ayahs revised (unique per surah from completed revisions)
+      const surahAyahsCovered = {}; // surahIdx -> Set of ayah numbers
+      const surahRevCount = {};     // surahIdx -> count of full revisions (where whole surah revised)
+      revs.filter(r => r.revised).forEach(r => {
+        const si = r.surahStart;
+        if (!surahAyahsCovered[si]) surahAyahsCovered[si] = new Set();
+        for (let a = r.ayahStart; a <= r.ayahEnd; a++) surahAyahsCovered[si].add(a);
       });
-      const topSurahs = Object.entries(surahFreq).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
+      // Count fully revised surahs and build "most revised" list
+      let fullyRevisedCount = 0;
+      const surahCompletionList = [];
+      for (const [si, ayahs] of Object.entries(surahAyahsCovered)) {
+        const idx = +si;
+        const total = surahAyahs(idx);
+        const covered = ayahs.size;
+        const pct = Math.min(Math.round(covered / total * 100), 100);
+        if (covered >= total) fullyRevisedCount++;
+        surahCompletionList.push({ idx, covered, total, pct });
+      }
+
+      // Total unique ayahs
+      let totalAyahsRevised = 0;
+      for (const ayahs of Object.values(surahAyahsCovered)) totalAyahsRevised += ayahs.size;
+      const totalAyahsQuran = SURAHS.reduce((s, x) => s + x[1], 0);
+
+      // Top surahs: only show those fully revised, sorted by revision count
+      const fullSurahRevCount = {};
+      revs.filter(r => r.revised).forEach(r => {
+        const si = r.surahStart;
+        const total = surahAyahs(si);
+        if (surahAyahsCovered[si] && surahAyahsCovered[si].size >= total) {
+          fullSurahRevCount[si] = (fullSurahRevCount[si] || 0) + 1;
+        }
+      });
+      const topFullSurahs = Object.entries(fullSurahRevCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+      // Partial progress surahs (not fully revised yet)
+      const partialSurahs = surahCompletionList.filter(s => s.pct > 0 && s.pct < 100).sort((a, b) => b.pct - a.pct).slice(0, 5);
+
+      // Cycle progress stats
+      let totalCycleDays = 0, completedCycleDays = 0;
+      cycles.forEach(c => {
+        totalCycleDays += c.totalDays;
+        completedCycleDays += c.completed ? c.totalDays : (c.currentDay - 1);
+      });
+
+      // === BUILD HTML ===
       let h = `<div class="card"><div class="card-title"><span class="icon">${ICONS.barChart}</span> الإحصائيات العامة</div>
     <div class="stats-grid">
     <div class="stat-card"><div class="stat-value">${streak}</div><div class="stat-label">${ICONS.flame} أيام متتالية</div></div>
-    <div class="stat-card"><div class="stat-value">${totalSessions}</div><div class="stat-label">${ICONS.edit} جلسات مسجلة</div></div>
-    <div class="stat-card"><div class="stat-value">${activeRevs}</div><div class="stat-label">${ICONS.book} مراجعات نشطة</div></div>
-    <div class="stat-card"><div class="stat-value">${completedRevs}</div><div class="stat-label">${ICONS.checkCircle} مراجعات مكتملة</div></div>
-    <div class="stat-card"><div class="stat-value">${completedCycles}</div><div class="stat-label">${ICONS.refresh} دورات مكتملة</div></div>
-    <div class="stat-card"><div class="stat-value">${tad.completedPages.length}</div><div class="stat-label">${ICONS.thought} صفحات تدبر</div></div>
+    <div class="stat-card"><div class="stat-value">${activeDays}</div><div class="stat-label">${ICONS.calendar} أيام نشاط</div></div>
+    <div class="stat-card"><div class="stat-value">${totalAyahsRevised}</div><div class="stat-label">${ICONS.book} آيات تمت مراجعتها</div></div>
+    <div class="stat-card"><div class="stat-value">${fullyRevisedCount}</div><div class="stat-label">${ICONS.checkCircle} سور كاملة</div></div>
     </div></div>`;
 
-      if (topSurahs.length) {
-        h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.star}</span> أكثر السور مراجعة</div>`;
-        topSurahs.forEach(([idx, count]) => {
-          const pct = Math.round(count / topSurahs[0][1] * 100);
-          h += `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.9em;margin-bottom:3px"><span>${surahName(+idx)}</span><span style="color:var(--gold)">${count} مرات</span></div>
+      // Memorization & Revision track
+      h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.book}</span> الحفظ والمراجعة</div>
+    <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value">${revs.length}</div><div class="stat-label">${ICONS.edit} جلسات مسجلة</div></div>
+    <div class="stat-card"><div class="stat-value">${activeRevs}</div><div class="stat-label">${ICONS.clock} مراجعات نشطة</div></div>
+    <div class="stat-card"><div class="stat-value">${completedRevs}</div><div class="stat-label">${ICONS.checkCircle} مراجعات مكتملة</div></div>
+    <div class="stat-card"><div class="stat-value">${Math.round(totalAyahsRevised / totalAyahsQuran * 100)}%</div><div class="stat-label">${ICONS.barChart} تغطية القرآن</div></div>
+    </div></div>`;
+
+      // Review cycles track
+      if (totalCycles > 0) {
+        h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.refresh}</span> دورات المراجعة</div>
+    <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value">${activeCycles}</div><div class="stat-label">${ICONS.clock} دورات نشطة</div></div>
+    <div class="stat-card"><div class="stat-value">${completedCycles}</div><div class="stat-label">${ICONS.checkCircle} دورات مكتملة</div></div>
+    <div class="stat-card"><div class="stat-value">${completedCycleDays}</div><div class="stat-label">${ICONS.calendar} أيام منجزة</div></div>
+    <div class="stat-card"><div class="stat-value">${totalCycleDays > 0 ? Math.round(completedCycleDays / totalCycleDays * 100) : 0}%</div><div class="stat-label">${ICONS.barChart} نسبة الإنجاز</div></div>
+    </div></div>`;
+      }
+
+      // Tadabbur track
+      if (s.track3) {
+        h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.thought}</span> التدبر</div>
+    <div class="stats-grid">
+    <div class="stat-card"><div class="stat-value">${tad.completedPages.length}</div><div class="stat-label">${ICONS.checkCircle} صفحات مكتملة</div></div>
+    <div class="stat-card"><div class="stat-value">${TOTAL_PAGES - tad.completedPages.length}</div><div class="stat-label">${ICONS.clock} صفحات متبقية</div></div>
+    <div class="stat-card"><div class="stat-value">${Math.round(tad.completedPages.length / TOTAL_PAGES * 100)}%</div><div class="stat-label">${ICONS.barChart} نسبة الإنجاز</div></div>
+    <div class="stat-card"><div class="stat-value">${s.tadabburPages}</div><div class="stat-label">${ICONS.bookOpen} صفحات يومياً</div></div>
+    </div></div>`;
+      }
+
+      // Top fully revised surahs
+      if (topFullSurahs.length) {
+        h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.star}</span> أكثر السور مراجعة (كاملة)</div>`;
+        topFullSurahs.forEach(([idx, count]) => {
+          const pct = Math.round(count / topFullSurahs[0][1] * 100);
+          h += `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.9em;margin-bottom:3px"><span>${surahName(+idx)}</span><span style="color:var(--gold)">${count} مراجعات</span></div>
         <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>`;
         });
         h += '</div>';
       }
+
+      // Partial progress surahs
+      if (partialSurahs.length) {
+        h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.sparkles}</span> سور قيد المراجعة</div>`;
+        partialSurahs.forEach(s => {
+          h += `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.9em;margin-bottom:3px"><span>${surahName(s.idx)}</span><span style="color:var(--gold)">${s.covered} / ${s.total} آية (${s.pct}%)</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${s.pct}%"></div></div></div>`;
+        });
+        h += '</div>';
+      }
+
       document.getElementById('statsContent').innerHTML = h;
     }
 
@@ -1581,11 +1849,81 @@
       }
     }
 
+    // ===== ONBOARDING =====
+    const OB_PAGES = [
+      {
+        html: `<h2>بسم الله الرحمن الرحيم</h2>
+          <div class="ob-subtitle">أهلاً بك في تطبيق متابع حفظ القرآن<br>رفيقك اليومي في رحلة الحفظ والمراجعة</div>
+          <div class="ob-verse">« وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذَِّكْرِ فَهَلْ مِن مُدَّكِرٍ »<br><span style="font-size:.8em;color:var(--text2)">سورة القمر - 17</span></div>
+          <p style="color:var(--text2);font-size:.88em;line-height:1.7">هذا التطبيق صُمّم ليكون بسيطاً وسريعاً، يساعدك على الانتظام في الحفظ والمراجعة حتى لا تضيع ما حفظت، بإذن الله.</p>`
+      },
+      {
+        html: `<h2>تسجيل الجلسات</h2>
+          <div class="ob-subtitle">الخطوة الأولى: سجّل ما حفظت وراجعت</div>
+          <div class="ob-steps">
+            <div class="ob-step"><div class="ob-step-icon">${ICONS.sparkles}</div><div class="ob-step-content"><h3>الحفظ الجديد</h3><p>سجّل الآيات التي حفظتها اليوم. اختر السورة وحدد من آية إلى آية.</p></div></div>
+            <div class="ob-step"><div class="ob-step-icon">${ICONS.bookOpen}</div><div class="ob-step-content"><h3>المراجعة القديمة</h3><p>سجّل ما راجعته مع الشيخ أو بمفردك. يمكنك إضافة أكثر من سورة في نفس الجلسة.</p></div></div>
+          </div>
+          <div class="ob-verse" style="font-size:.95em">« تَعَاهَدُوا هَذَا الْقُرْآنَ، فَوَالَّذِي نَفْسِي بِيَدِهِ لَهُوَ أَشَدُّ تَفَصَّياً مِنَ الْإِبِلِ فِي عُقُلِهَا »<br><span style="font-size:.8em;color:var(--text2)">رواه البخاري ومسلم</span></div>`
+      },
+      {
+        html: `<h2>المراجعة المتكررة</h2>
+          <div class="ob-subtitle">سرّ تثبيت الحفظ: التكرار المتباعد</div>
+          <div class="ob-steps">
+            <div class="ob-step"><div class="ob-step-icon">${ICONS.clock}</div><div class="ob-step-content"><h3>7 أيام تلقائية</h3><p>عند تسجيل جلسة، يُنشئ التطبيق مهام مراجعة لمدة 7 أيام. هذا يعتمد على مبدأ التكرار المتباعد (Spaced Repetition) الذي أثبت فعاليته في تثبيت المحفوظات.</p></div></div>
+            <div class="ob-step"><div class="ob-step-icon">${ICONS.home}</div><div class="ob-step-content"><h3>الصفحة الرئيسية</h3><p>كل يوم ستجد ما يجب مراجعته بوضوح. اضغط علامة ✔ عند الإتمام.</p></div></div>
+          </div>
+          <p style="color:var(--text2);font-size:.85em;line-height:1.7">المراجعة المنتظمة هي الفرق بين حافظ يحفظ وينسى، وحافظ يحفظ ويُثبّت.</p>`
+      },
+      {
+        html: `<h2>دورات المراجعة الشاملة</h2>
+          <div class="ob-subtitle">للمحفوظ القديم الذي يحتاج تثبيتاً مستمراً</div>
+          <div class="ob-steps">
+            <div class="ob-step"><div class="ob-step-icon">${ICONS.refresh}</div><div class="ob-step-content"><h3>أنشئ دورة</h3><p>حدد نطاق صفحات أو سور تريد مراجعتها. التطبيق سيعرض لك السور الموجودة في كل صفحة.</p></div></div>
+            <div class="ob-step"><div class="ob-step-icon">${ICONS.checkCircle}</div><div class="ob-step-content"><h3>تابع يومياً</h3><p>سجّل عدد مرات القراءة والاستماع كل يوم. عند إكمال المطلوب انتقل لليوم التالي حتى تُنهي الدورة.</p></div></div>
+          </div>
+          <p style="color:var(--text2);font-size:.85em;line-height:1.7">الدورات تساعدك على تغطية كل ما حفظته سابقاً بشكل منظم لا يفلت منك شيء.</p>`
+      },
+      {
+        html: `<h2>ابدأ الآن</h2>
+          <div class="ob-verse">« خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ »<br><span style="font-size:.8em;color:var(--text2)">رواه البخاري</span></div>
+          <div class="ob-steps">
+            <div class="ob-step"><div class="ob-step-icon">1</div><div class="ob-step-content"><p>اذهب إلى <strong>جلسة</strong> وسجّل أول حفظ أو مراجعة</p></div></div>
+            <div class="ob-step"><div class="ob-step-icon">2</div><div class="ob-step-content"><p>اذهب إلى <strong>مراجعة</strong> وأنشئ دورة لمحفوظك القديم</p></div></div>
+            <div class="ob-step"><div class="ob-step-icon">3</div><div class="ob-step-content"><p>تابع ال<strong>رئيسية</strong> يومياً وأتمّ مهامك</p></div></div>
+          </div>
+          <p style="color:var(--gold);font-size:.95em;font-weight:600;margin-bottom:8px">بارك الله في همّتك وثبّتك على الحفظ!</p>`
+      }
+    ];
+    let obStep = 0;
+    function renderOB() {
+      document.getElementById('obContent').innerHTML = OB_PAGES[obStep].html;
+      const dots = document.getElementById('obDots');
+      dots.innerHTML = OB_PAGES.map((_, i) => `<div class="ob-dot${i === obStep ? ' active' : ''}"></div>`).join('');
+      document.getElementById('obPrev').style.display = obStep === 0 ? 'none' : '';
+      document.getElementById('obNext').textContent = obStep === OB_PAGES.length - 1 ? 'ابدأ الآن' : 'التالي';
+    }
+    function obNav(dir) {
+      if (dir === 1 && obStep === OB_PAGES.length - 1) {
+        document.getElementById('onboarding').classList.add('hidden');
+        localStorage.setItem('qt_onboarded', '1');
+        return;
+      }
+      obStep = Math.max(0, Math.min(OB_PAGES.length - 1, obStep + dir));
+      renderOB();
+    }
+    function showOnboarding() {
+      obStep = 0;
+      document.getElementById('onboarding').classList.remove('hidden');
+      renderOB();
+    }
+
     // ===== INIT =====
     document.addEventListener('DOMContentLoaded', () => {
       initIcons(); applyTheme(); populateDropdowns(); cleanupExpired(); loadSettings();
       document.getElementById('sessionDate').value = today();
       renderDashboard();
+      if (!localStorage.getItem('qt_onboarded')) showOnboarding();
       if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(e => console.log('SW reg failed:', e)) }
     });
   </script>
