@@ -965,7 +965,7 @@
         <div class="card-title"><span class="icon" id="sessionIcon"></span> تسجيل جلسة جديدة</div>
         <div class="form-group">
           <label>التاريخ</label>
-          <input type="text" id="sessionDate" placeholder="dd/mm/yyyy" inputmode="numeric" maxlength="10" onclick="this.showPicker?.()" onfocus="formatDateInput(this)" oninput="formatDateInput(this)">
+          <input type="date" id="sessionDate">
         </div>
 
         <!-- New Memorization Slots -->
@@ -1191,14 +1191,9 @@
     function getData(key) { try { return JSON.parse(localStorage.getItem(key) || '[]') } catch (e) { return [] } }
     function setData(key, val) { localStorage.setItem(key, JSON.stringify(val)) }
     function today() { const d = new Date(); return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + '/' + d.getFullYear() }
+    function todayISO() { return new Date().toISOString().split('T')[0] }
+    function isoToDMY(iso) { const p = iso.split('-'); return p[2] + '/' + p[1] + '/' + p[0] }
     function parseDMY(s) { const p = s.split('/'); return new Date(+p[2], +p[1]-1, +p[0]) }
-    function formatDateInput(el) {
-      let v = el.value.replace(/[^0-9]/g, '');
-      if (v.length > 2) v = v.slice(0,2) + '/' + v.slice(2);
-      if (v.length > 5) v = v.slice(0,5) + '/' + v.slice(5);
-      if (v.length > 10) v = v.slice(0,10);
-      el.value = v;
-    }
     function daysDiff(d1, d2) { return Math.floor((parseDMY(d1) - parseDMY(d2)) / 86400000) }
     function addDays(d, n) { const dt = parseDMY(d); dt.setDate(dt.getDate() + n); return String(dt.getDate()).padStart(2,'0') + '/' + String(dt.getMonth()+1).padStart(2,'0') + '/' + dt.getFullYear() }
     function surahName(idx) { return SURAHS[idx] ? SURAHS[idx][0] : '' }
@@ -1320,8 +1315,9 @@
 
     // ===== TRACK 1: SESSION LOGGING & REVISION =====
     function saveSession() {
-      const date = document.getElementById('sessionDate').value || today();
-      if (!/^\d{2}\/\d{2}\/\d{4}$/.test(date)) { showToast('أدخل تاريخ صحيح (dd/mm/yyyy)', true); return }
+      const raw = document.getElementById('sessionDate').value;
+      if (!raw) { showToast('أدخل التاريخ', true); return }
+      const date = isoToDMY(raw);
       const newSlots = getSlots('new');
       const oldSlots = getSlots('old');
 
@@ -1358,7 +1354,7 @@
       // check for overlapping items of same type and merge
       for (let i = 0; i < arr.length; i++) {
         const r = arr[i];
-        if (r.type === item.type && r.surahStart === item.surahStart && r.surahEnd === item.surahEnd && !r.revised) {
+        if (r.type === item.type && r.surahStart === item.surahStart && r.surahEnd === item.surahEnd && !isFullyRevised(r)) {
           if (rangesOverlap(r.ayahStart, r.ayahEnd, item.ayahStart, item.ayahEnd)) {
             r.ayahStart = Math.min(r.ayahStart, item.ayahStart);
             r.ayahEnd = Math.max(r.ayahEnd, item.ayahEnd);
@@ -1367,15 +1363,22 @@
           }
         }
       }
-      arr.push({ ...item, id: Date.now() + '_' + Math.random().toString(36).slice(2, 6), revised: false });
+      arr.push({ ...item, id: Date.now() + '_' + Math.random().toString(36).slice(2, 6), revisedDates: [] });
     }
 
     function rangesOverlap(s1, e1, s2, e2) { return s1 <= e2 && s2 <= e1 }
+    function getRevisedDates(r) { return r.revisedDates || (r.revised ? [r.revisedDate || r.date] : []) }
+    function hasRevisedToday(r) { return getRevisedDates(r).includes(today()) }
+    function isFullyRevised(r) { return r.revised === true }
+    function isExpired(r) { return parseDMY(r.expires) < parseDMY(today()) }
 
     function markRevised(id) {
       const revs = getData('qt_revisions');
       const r = revs.find(x => x.id === id);
-      if (r) { r.revised = true; r.revisedDate = today() }
+      if (r) {
+        if (!r.revisedDates) r.revisedDates = [];
+        if (!r.revisedDates.includes(today())) r.revisedDates.push(today());
+      }
       setData('qt_revisions', revs);
       recordActivity(today());
       renderDashboard();
@@ -1521,14 +1524,14 @@
     // ===== CLEANUP EXPIRED =====
     function cleanupExpired() {
       let revs = getData('qt_revisions');
-      revs = revs.filter(r => parseDMY(r.expires) >= parseDMY(today()) || r.revised);
+      revs = revs.filter(r => !isExpired(r));
       setData('qt_revisions', revs);
     }
 
     // ===== RENDER DASHBOARD =====
     function renderDashboard() {
       const s = getSettings();
-      const revs = getData('qt_revisions').filter(r => !r.revised && parseDMY(r.expires) >= parseDMY(today()));
+      const revs = getData('qt_revisions').filter(r => !isExpired(r) && !hasRevisedToday(r));
       const cycles = getData('qt_cycles').filter(c => !c.completed);
       const tad = getTadabburState();
       let hasContent = false;
@@ -1546,9 +1549,11 @@
         let h = '<div class="card"><div class="card-title"><span class="icon">' + ICONS.book + '</span> مراجعة اليوم</div>';
         revs.forEach(r => {
           const daysLeft = daysDiff(r.expires, today());
+          const rd = getRevisedDates(r);
+          const doneCount = rd.length;
           h += `<div class="revision-item">
         <div class="info"><div class="surah">${formatRange(r.surahStart, r.ayahStart, r.surahEnd, r.ayahEnd)}</div>
-        <div class="ayah">${r.type === 'new' ? 'حفظ جديد' : 'مراجعة قديمة'}</div>
+        <div class="ayah">${r.type === 'new' ? 'حفظ جديد' : 'مراجعة قديمة'} — ${doneCount}/7 أيام</div>
         <div class="days-left">${ICONS.clock} ${daysLeft} أيام متبقية</div></div>
         <button class="check-btn" onclick="markRevised('${r.id}')">${ICONS.check}</button></div>`;
         });
@@ -1678,8 +1683,8 @@
       const activeDays = getData('qt_activity').length;
 
       // Revision stats
-      const activeRevs = revs.filter(r => !r.revised && parseDMY(r.expires) >= parseDMY(today())).length;
-      const completedRevs = revs.filter(r => r.revised).length;
+      const activeRevs = revs.filter(r => !isExpired(r) && !hasRevisedToday(r)).length;
+      const completedRevs = revs.filter(r => getRevisedDates(r).length > 0).length;
       const totalCycles = cycles.length;
       const completedCycles = cycles.filter(c => c.completed).length;
       const activeCycles = cycles.filter(c => !c.completed).length;
@@ -1687,7 +1692,7 @@
       // Compute total ayahs revised (unique per surah from completed revisions)
       const surahAyahsCovered = {}; // surahIdx -> Set of ayah numbers
       const surahRevCount = {};     // surahIdx -> count of full revisions (where whole surah revised)
-      revs.filter(r => r.revised).forEach(r => {
+      revs.filter(r => getRevisedDates(r).length > 0).forEach(r => {
         const si = r.surahStart;
         if (!surahAyahsCovered[si]) surahAyahsCovered[si] = new Set();
         for (let a = r.ayahStart; a <= r.ayahEnd; a++) surahAyahsCovered[si].add(a);
@@ -1712,7 +1717,7 @@
 
       // Top surahs: only show those fully revised, sorted by revision count
       const fullSurahRevCount = {};
-      revs.filter(r => r.revised).forEach(r => {
+      revs.filter(r => getRevisedDates(r).length > 0).forEach(r => {
         const si = r.surahStart;
         const total = surahAyahs(si);
         if (surahAyahsCovered[si] && surahAyahsCovered[si].size >= total) {
@@ -1921,7 +1926,9 @@
     // ===== INIT =====
     document.addEventListener('DOMContentLoaded', () => {
       initIcons(); applyTheme(); populateDropdowns(); cleanupExpired(); loadSettings();
-      document.getElementById('sessionDate').value = today();
+      const sd = document.getElementById('sessionDate');
+      sd.value = todayISO();
+      sd.max = todayISO();
       renderDashboard();
       if (!localStorage.getItem('qt_onboarded')) showOnboarding();
       if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(e => console.log('SW reg failed:', e)) }
