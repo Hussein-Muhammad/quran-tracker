@@ -51,14 +51,14 @@
     }
 
     body.light {
-      --bg: #ebe5d9;
-      --bg2: #ddd4c1;
-      --bg3: #c4b394;
-      --card: #fff;
-      --card2: #f2ead9;
-      --text: #1f1f1f;
-      --text2: #555555;
-      --shadow: 0 4px 20px rgba(0, 0, 0, .12)
+      --bg: #e2dac9;
+      --bg2: #d3c9b3;
+      --bg3: #b8a888;
+      --card: #faf7f2;
+      --card2: #ede5d2;
+      --text: #181818;
+      --text2: #444444;
+      --shadow: 0 4px 20px rgba(0, 0, 0, .15)
     }
 
     .header {
@@ -781,6 +781,33 @@
       color: #fff;
     }
 
+    .show-more-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      border: 1px dashed var(--gold);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--gold);
+      font-size: .88em;
+      cursor: pointer;
+      transition: background .2s, opacity .2s;
+    }
+    .show-more-btn:hover { background: rgba(212,168,67,.08) }
+    .show-more-btn svg { width: 16px; height: 16px; transition: transform .3s }
+    .show-more-btn.expanded svg { transform: rotate(180deg) }
+
+    .import-export-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .import-export-row .btn { display:flex; align-items:center; justify-content:center; gap:6px }
+
     /* Onboarding walkthrough */
     .onboarding-overlay {
       position: fixed;
@@ -911,6 +938,87 @@
     .ob-nav .btn {
       min-width: 100px;
     }
+
+    /* Reminder day circles */
+    .day-circles {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin: 10px 0;
+      flex-wrap: wrap;
+    }
+
+    .day-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 2px solid var(--gold);
+      background: transparent;
+      color: var(--gold);
+      font-size: .8em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+    }
+
+    .day-circle.active {
+      background: var(--gold);
+      color: var(--bg);
+    }
+
+    .reminder-time-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .reminder-time-row input[type="time"] {
+      padding: 8px 12px;
+      border: 1.5px solid rgba(212, 168, 67, .3);
+      border-radius: 10px;
+      background: var(--card2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1.1em;
+      text-align: center;
+      width: 130px;
+    }
+
+    .reminder-time-row input[type="time"]:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+
+    .reminder-status {
+      text-align: center;
+      font-size: .82em;
+      color: var(--text2);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    .reminder-msg-select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid rgba(212, 168, 67, .2);
+      border-radius: 10px;
+      background: var(--card2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .9em;
+      margin: 8px 0;
+    }
+
+    .reminder-msg-select:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
   </style>
 </head>
 
@@ -1013,7 +1121,7 @@
         </div>
         <div id="cycleSurahMode" style="display:none">
           <div class="form-row">
-            <div class="form-group"><label>من سورة</label><select id="cycleSurahStart"></select></div>
+            <div class="form-group"><label>من سورة</label><select id="cycleSurahStart" onchange="document.getElementById('cycleSurahEnd').value=this.value"></select></div>
             <div class="form-group"><label>إلى سورة</label><select id="cycleSurahEnd"></select></div>
           </div>
         </div>
@@ -1058,6 +1166,39 @@
             max="604" value="1" onchange="saveSetting()"></div>
       </div>
       <div class="card">
+        <div class="card-title"><span class="icon" id="reminderIcon"></span> التذكير اليومي</div>
+        <div class="setting-item">
+          <label>تفعيل التذكير</label>
+          <label class="toggle"><input type="checkbox" id="setReminderEnabled" onchange="saveReminderSettings()"><span class="slider"></span></label>
+        </div>
+        <div id="reminderDetails">
+          <div class="reminder-time-row">
+            <label style="color:var(--text2);font-size:.9em">وقت التذكير</label>
+            <input type="time" id="setReminderTime" value="00:00" onchange="saveReminderSettings()">
+          </div>
+          <label style="color:var(--text2);font-size:.88em;display:block;margin-bottom:4px">أيام التذكير</label>
+          <div class="day-circles" id="reminderDays">
+            <button class="day-circle active" data-day="0" onclick="toggleReminderDay(this)">Su</button>
+            <button class="day-circle active" data-day="1" onclick="toggleReminderDay(this)">Mo</button>
+            <button class="day-circle active" data-day="2" onclick="toggleReminderDay(this)">Tu</button>
+            <button class="day-circle active" data-day="3" onclick="toggleReminderDay(this)">We</button>
+            <button class="day-circle active" data-day="4" onclick="toggleReminderDay(this)">Th</button>
+            <button class="day-circle active" data-day="5" onclick="toggleReminderDay(this)">Fr</button>
+            <button class="day-circle active" data-day="6" onclick="toggleReminderDay(this)">Sa</button>
+          </div>
+          <label style="color:var(--text2);font-size:.88em;display:block;margin:8px 0 2px">نص التذكير</label>
+          <select class="reminder-msg-select" id="setReminderMsg" onchange="saveReminderSettings()">
+            <option value="0">حان وقت مراجعة القرآن — افتح التطبيق وسجّل جلستك</option>
+            <option value="1">تعاهدوا هذا القرآن — هل راجعت وردك اليوم؟</option>
+            <option value="2">خَيْرُكُمْ مَنْ تَعَلَّمَ القرآن وَعَلَّمَهُ — ابدأ جلستك الآن</option>
+            <option value="3">لا تنسَ وردك من القرآن اليوم — كل آية نور في قلبك</option>
+            <option value="4">موعدك مع كتاب الله — افتح المصحف وابدأ</option>
+            <option value="5">راجع حفظك قبل أن يضيع — المداومة سر التثبيت</option>
+          </select>
+          <div class="reminder-status" id="reminderStatus"></div>
+        </div>
+      </div>
+      <div class="card">
         <div class="card-title"><span class="icon" id="dataIcon"></span> حذف البيانات</div>
         <div class="delete-data-grid">
           <button class="btn btn-danger-outline btn-block" onclick="deleteDataType('qt_revisions','جلسات الحفظ والمراجعة اليومية')">
@@ -1076,6 +1217,15 @@
             <span id="delAllIcon"></span> حذف جميع البيانات
           </button>
         </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="icon" id="ioIcon"></span> استيراد / تصدير البيانات</div>
+        <div class="import-export-row">
+          <button class="btn btn-primary btn-block" onclick="exportData()"><span id="exportBtnIcon"></span> تصدير</button>
+          <button class="btn btn-success btn-block" onclick="document.getElementById('importFile').click()"><span id="importBtnIcon"></span> استيراد</button>
+        </div>
+        <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+        <div style="color:var(--text2);font-size:.78em;margin-top:8px;text-align:center">تصدير بياناتك كملف JSON للنقل بين الأجهزة</div>
       </div>
     </div>
 
@@ -1123,6 +1273,7 @@
       skipForward: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>`,
       database: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
       calendar: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+      bell: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>`,
     };
 
     // ===== SURAH DATA [name, ayahCount, startPage] =====
@@ -1453,6 +1604,7 @@
       setData('qt_cycles', cycles);
       recordActivity(today());
       renderReviewPage();
+      renderDashboard();
     }
     function markCycleListen(cycleId, extra) {
       const cycles = getData('qt_cycles');
@@ -1465,6 +1617,7 @@
       setData('qt_cycles', cycles);
       recordActivity(today());
       renderReviewPage();
+      renderDashboard();
     }
     function checkDayComplete(c) {
       const dp = c.dailyProgress[c.currentDay - 1];
@@ -1478,6 +1631,7 @@
       else { c.currentDay++; c.dailyProgress.push({ day: c.currentDay, readsCompleted: 0, listensCompleted: 0, complete: false }) }
       setData('qt_cycles', cycles);
       renderReviewPage();
+      renderDashboard();
     }
     function deleteCycle(cycleId) {
       if (!confirm('حذف هذه الدورة؟')) return;
@@ -1643,8 +1797,13 @@
         h += `</div>`;
       });
       if (completed.length) {
+        const PAGE_SIZE = 5;
+        const sorted = completed.slice().reverse();
         h += '<div class="card"><div class="card-title"><span class="icon">' + ICONS.checkCircle + '</span> الدورات المكتملة</div>';
-        completed.slice(-5).reverse().forEach(c => { h += `<div class="revision-item"><div class="info"><div class="surah">${c.label}</div><div class="ayah">${c.createdDate}</div></div><button class="btn btn-danger btn-sm" onclick="deleteCycle(${c.id})">${ICONS.trash}</button></div>` });
+        sorted.forEach((c, i) => { h += `<div class="revision-item" ${i >= PAGE_SIZE ? 'style="display:none"' : ''} data-list="completedCycles">`
+          + `<div class="info"><div class="surah">${c.label}</div><div class="ayah">${c.createdDate}</div></div>`
+          + `<button class="btn btn-danger btn-sm" onclick="deleteCycle(${c.id})">${ICONS.trash}</button></div>` });
+        if (sorted.length > PAGE_SIZE) h += `<button class="show-more-btn" onclick="toggleShowMore(this,'completedCycles',${PAGE_SIZE})">${ICONS.download} عرض المزيد (${sorted.length - PAGE_SIZE})</button>`;
         h += '</div>';
       }
       el.innerHTML = h;
@@ -1724,10 +1883,10 @@
           fullSurahRevCount[si] = (fullSurahRevCount[si] || 0) + 1;
         }
       });
-      const topFullSurahs = Object.entries(fullSurahRevCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      const topFullSurahs = Object.entries(fullSurahRevCount).sort((a, b) => b[1] - a[1]);
 
       // Partial progress surahs (not fully revised yet)
-      const partialSurahs = surahCompletionList.filter(s => s.pct > 0 && s.pct < 100).sort((a, b) => b.pct - a.pct).slice(0, 5);
+      const partialSurahs = surahCompletionList.filter(s => s.pct > 0 && s.pct < 100).sort((a, b) => b.pct - a.pct);
 
       // Cycle progress stats
       let totalCycleDays = 0, completedCycleDays = 0;
@@ -1778,22 +1937,26 @@
 
       // Top fully revised surahs
       if (topFullSurahs.length) {
+        const PAGE_S1 = 5;
         h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.star}</span> أكثر السور مراجعة (كاملة)</div>`;
-        topFullSurahs.forEach(([idx, count]) => {
+        topFullSurahs.forEach(([idx, count], i) => {
           const pct = Math.round(count / topFullSurahs[0][1] * 100);
-          h += `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.9em;margin-bottom:3px"><span>${surahName(+idx)}</span><span style="color:var(--gold)">${count} مراجعات</span></div>
+          h += `<div style="margin-bottom:10px${i >= PAGE_S1 ? ';display:none' : ''}" data-list="topSurahs"><div style="display:flex;justify-content:space-between;font-size:.9em;margin-bottom:3px"><span>${surahName(+idx)}</span><span style="color:var(--gold)">${count} مراجعات</span></div>
         <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div></div>`;
         });
+        if (topFullSurahs.length > PAGE_S1) h += `<button class="show-more-btn" onclick="toggleShowMore(this,'topSurahs',${PAGE_S1})">${ICONS.download} عرض المزيد (${topFullSurahs.length - PAGE_S1})</button>`;
         h += '</div>';
       }
 
       // Partial progress surahs
       if (partialSurahs.length) {
+        const PAGE_S2 = 5;
         h += `<div class="card"><div class="card-title"><span class="icon">${ICONS.sparkles}</span> سور قيد المراجعة</div>`;
-        partialSurahs.forEach(s => {
-          h += `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:.9em;margin-bottom:3px"><span>${surahName(s.idx)}</span><span style="color:var(--gold)">${s.covered} / ${s.total} آية (${s.pct}%)</span></div>
+        partialSurahs.forEach((s, i) => {
+          h += `<div style="margin-bottom:10px${i >= PAGE_S2 ? ';display:none' : ''}" data-list="partialSurahs"><div style="display:flex;justify-content:space-between;font-size:.9em;margin-bottom:3px"><span>${surahName(s.idx)}</span><span style="color:var(--gold)">${s.covered} / ${s.total} آية (${s.pct}%)</span></div>
         <div class="progress-bar"><div class="progress-fill" style="width:${s.pct}%"></div></div></div>`;
         });
+        if (partialSurahs.length > PAGE_S2) h += `<button class="show-more-btn" onclick="toggleShowMore(this,'partialSurahs',${PAGE_S2})">${ICONS.download} عرض المزيد (${partialSurahs.length - PAGE_S2})</button>`;
         h += '</div>';
       }
 
@@ -1816,6 +1979,62 @@
       if (!confirm('هل أنت متأكد من حذف جميع البيانات؟')) return;
       localStorage.clear();
       location.reload();
+    }
+
+    // ===== SHOW MORE / PAGINATION =====
+    function toggleShowMore(btn, listName, pageSize) {
+      const items = document.querySelectorAll(`[data-list="${listName}"]`);
+      const expanded = btn.classList.toggle('expanded');
+      if (expanded) {
+        items.forEach(el => el.style.display = '');
+        btn.innerHTML = ICONS.download + ' عرض أقل';
+      } else {
+        items.forEach((el, i) => { if (i >= pageSize) el.style.display = 'none' });
+        const hidden = items.length - pageSize;
+        btn.innerHTML = ICONS.download + ` عرض المزيد (${hidden})`;
+      }
+    }
+
+    // ===== IMPORT / EXPORT =====
+    function exportData() {
+      const keys = ['qt_revisions', 'qt_cycles', 'qt_tadabbur', 'qt_activity', 'qt_settings', 'qt_reminder', 'qt_onboarded'];
+      const data = {};
+      keys.forEach(k => {
+        const v = localStorage.getItem(k);
+        if (v !== null) data[k] = JSON.parse(v);
+      });
+      data._exportDate = new Date().toISOString();
+      data._appVersion = 'quran-tracker-v1';
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quran-tracker-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('تم تصدير البيانات بنجاح');
+    }
+    function importData(evt) {
+      const file = evt.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data || typeof data !== 'object') throw new Error('invalid');
+          const validKeys = ['qt_revisions', 'qt_cycles', 'qt_tadabbur', 'qt_activity', 'qt_settings', 'qt_reminder', 'qt_onboarded'];
+          const found = validKeys.filter(k => data[k] !== undefined);
+          if (!found.length) { showToast('الملف لا يحتوي على بيانات صالحة', true); return }
+          if (!confirm(`سيتم استيراد ${found.length} أنواع بيانات. البيانات الحالية سيتم استبدالها. متابعة؟`)) return;
+          found.forEach(k => localStorage.setItem(k, JSON.stringify(data[k])));
+          showToast('تم استيراد البيانات بنجاح');
+          setTimeout(() => location.reload(), 800);
+        } catch(err) {
+          showToast('خطأ في قراءة الملف', true);
+        }
+      };
+      reader.readAsText(file);
+      evt.target.value = '';
     }
 
     // ===== INIT ICONS =====
@@ -1847,6 +2066,10 @@
         delTadIcon: ICONS.trash,
         delActIcon: ICONS.trash,
         delAllIcon: ICONS.trash,
+        reminderIcon: ICONS.bell,
+        ioIcon: ICONS.download,
+        exportBtnIcon: ICONS.download,
+        importBtnIcon: ICONS.save,
       };
       for (const [id, html] of Object.entries(map)) {
         const el = document.getElementById(id);
@@ -1923,13 +2146,100 @@
       renderOB();
     }
 
+    // ===== REMINDER NOTIFICATIONS =====
+    const REMINDER_MSGS = [
+      'حان وقت مراجعة القرآن — افتح التطبيق وسجّل جلستك',
+      'تعاهدوا هذا القرآن — هل راجعت وردك اليوم؟',
+      'خَيْرُكُمْ مَنْ تَعَلَّمَ القرآن وَعَلَّمَهُ — ابدأ جلستك الآن',
+      'لا تنسَ وردك من القرآن اليوم — كل آية نور في قلبك',
+      'موعدك مع كتاب الله — افتح المصحف وابدأ',
+      'راجع حفظك قبل أن يضيع — المداومة سر التثبيت'
+    ];
+    const REMINDER_DEFAULTS = { enabled: true, time: '00:00', days: [0,1,2,3,4,5,6] };
+    function getReminderSettings() {
+      try { return { ...REMINDER_DEFAULTS, ...JSON.parse(localStorage.getItem('qt_reminder') || '{}') } } catch(e) { return { ...REMINDER_DEFAULTS } }
+    }
+    function toggleReminderDay(btn) {
+      btn.classList.toggle('active');
+      saveReminderSettings();
+    }
+    function saveReminderSettings() {
+      const enabled = document.getElementById('setReminderEnabled').checked;
+      const time = document.getElementById('setReminderTime').value || '12:00';
+      const days = [];
+      document.querySelectorAll('#reminderDays .day-circle').forEach(btn => {
+        if (btn.classList.contains('active')) days.push(+btn.dataset.day);
+      });
+      localStorage.setItem('qt_reminder', JSON.stringify({ enabled, time, days }));
+      document.getElementById('reminderDetails').style.display = enabled ? 'block' : 'none';
+      updateReminderStatus();
+      scheduleReminder();
+    }
+    function loadReminderSettings() {
+      const r = getReminderSettings();
+      document.getElementById('setReminderEnabled').checked = r.enabled;
+      document.getElementById('setReminderTime').value = r.time;
+      document.getElementById('reminderDetails').style.display = r.enabled ? 'block' : 'none';
+      document.querySelectorAll('#reminderDays .day-circle').forEach(btn => {
+        btn.classList.toggle('active', r.days.includes(+btn.dataset.day));
+      });
+      updateReminderStatus();
+    }
+    function updateReminderStatus() {
+      const r = getReminderSettings();
+      const el = document.getElementById('reminderStatus');
+      if (!r.enabled) { el.textContent = 'التذكير معطل'; return }
+      if (!('Notification' in window)) { el.textContent = 'المتصفح لا يدعم الإشعارات'; return }
+      if (Notification.permission === 'denied') { el.innerHTML = 'الإشعارات محظورة — فعّلها من إعدادات المتصفح'; return }
+      const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+      const selectedDays = r.days.length === 7 ? 'كل يوم' : r.days.map(d => dayNames[d]).join('، ');
+      el.textContent = 'الساعة ' + r.time + ' — ' + selectedDays;
+    }
+    let reminderTimer = null;
+    function scheduleReminder() {
+      if (reminderTimer) { clearTimeout(reminderTimer); reminderTimer = null; }
+      const r = getReminderSettings();
+      if (!r.enabled || !r.days.length) return;
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+      const now = new Date();
+      const [hh, mm] = r.time.split(':').map(Number);
+      let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0);
+      // Find the next matching day
+      for (let i = 0; i < 8; i++) {
+        const candidate = new Date(next.getTime() + i * 86400000);
+        if (candidate > now && r.days.includes(candidate.getDay())) {
+          next = candidate;
+          break;
+        }
+      }
+      const ms = next.getTime() - now.getTime();
+      if (ms > 0 && ms < 7 * 86400000) {
+        reminderTimer = setTimeout(() => {
+          if (Notification.permission === 'granted') {
+            new Notification('متابع حفظ القرآن', {
+              body: REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)],
+              icon: 'icon-192.png',
+              tag: 'qt-reminder',
+              renotify: true
+            });
+          }
+          // Reschedule for next occurrence
+          setTimeout(() => scheduleReminder(), 1000);
+        }, ms);
+      }
+    }
+
     // ===== INIT =====
     document.addEventListener('DOMContentLoaded', () => {
-      initIcons(); applyTheme(); populateDropdowns(); cleanupExpired(); loadSettings();
+      initIcons(); applyTheme(); populateDropdowns(); cleanupExpired(); loadSettings(); loadReminderSettings();
       const sd = document.getElementById('sessionDate');
       sd.value = todayISO();
       sd.max = todayISO();
       renderDashboard();
+      scheduleReminder();
       if (!localStorage.getItem('qt_onboarded')) showOnboarding();
       if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(e => console.log('SW reg failed:', e)) }
     });
