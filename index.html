@@ -1002,23 +1002,6 @@
       margin-top: 8px;
       line-height: 1.5;
     }
-
-    .reminder-msg-select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid rgba(212, 168, 67, .2);
-      border-radius: 10px;
-      background: var(--card2);
-      color: var(--text);
-      font-family: inherit;
-      font-size: .9em;
-      margin: 8px 0;
-    }
-
-    .reminder-msg-select:focus {
-      outline: none;
-      border-color: var(--gold);
-    }
   </style>
 </head>
 
@@ -1186,15 +1169,7 @@
             <button class="day-circle active" data-day="5" onclick="toggleReminderDay(this)">Fr</button>
             <button class="day-circle active" data-day="6" onclick="toggleReminderDay(this)">Sa</button>
           </div>
-          <label style="color:var(--text2);font-size:.88em;display:block;margin:8px 0 2px">نص التذكير</label>
-          <select class="reminder-msg-select" id="setReminderMsg" onchange="saveReminderSettings()">
-            <option value="0">حان وقت مراجعة القرآن — افتح التطبيق وسجّل جلستك</option>
-            <option value="1">تعاهدوا هذا القرآن — هل راجعت وردك اليوم؟</option>
-            <option value="2">خَيْرُكُمْ مَنْ تَعَلَّمَ القرآن وَعَلَّمَهُ — ابدأ جلستك الآن</option>
-            <option value="3">لا تنسَ وردك من القرآن اليوم — كل آية نور في قلبك</option>
-            <option value="4">موعدك مع كتاب الله — افتح المصحف وابدأ</option>
-            <option value="5">راجع حفظك قبل أن يضيع — المداومة سر التثبيت</option>
-          </select>
+
           <div class="reminder-status" id="reminderStatus"></div>
         </div>
       </div>
@@ -2204,6 +2179,8 @@
       if (Notification.permission === 'default') {
         Notification.requestPermission();
       }
+      // Sync reminder settings to service worker for background notifications
+      syncReminderToSW();
       const now = new Date();
       const [hh, mm] = r.time.split(':').map(Number);
       let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0);
@@ -2218,18 +2195,35 @@
       const ms = next.getTime() - now.getTime();
       if (ms > 0 && ms < 7 * 86400000) {
         reminderTimer = setTimeout(() => {
-          if (Notification.permission === 'granted') {
-            new Notification('متابع حفظ القرآن', {
-              body: REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)],
-              icon: 'icon-192.png',
-              tag: 'qt-reminder',
-              renotify: true
-            });
-          }
+          fireNotification();
           // Reschedule for next occurrence
           setTimeout(() => scheduleReminder(), 1000);
         }, ms);
       }
+    }
+    function fireNotification() {
+      if (Notification.permission !== 'granted') return;
+      const body = REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)];
+      // Use service worker showNotification (required for Android PWA)
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification('متابع حفظ القرآن', {
+            body, icon: 'icon-192.png', badge: 'icon-192.png',
+            tag: 'qt-reminder', renotify: true,
+            vibrate: [200, 100, 200],
+            data: { url: self.location.href }
+          });
+        });
+      }
+    }
+    function syncReminderToSW() {
+      if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
+      const r = getReminderSettings();
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SET_REMINDER',
+        reminder: r,
+        messages: REMINDER_MSGS
+      });
     }
 
     // ===== INIT =====
@@ -2241,7 +2235,18 @@
       renderDashboard();
       scheduleReminder();
       if (!localStorage.getItem('qt_onboarded')) showOnboarding();
-      if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(e => console.log('SW reg failed:', e)) }
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(() => {
+          // Once SW is ready, sync reminder settings to it
+          navigator.serviceWorker.ready.then(() => syncReminderToSW());
+        }).catch(e => console.log('SW reg failed:', e));
+      }
+    });
+    // Re-sync reminder to SW when app becomes visible again
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        scheduleReminder();
+      }
     });
   </script>
 </body>
