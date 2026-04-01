@@ -939,69 +939,6 @@
       min-width: 100px;
     }
 
-    /* Reminder day circles */
-    .day-circles {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      margin: 10px 0;
-      flex-wrap: wrap;
-    }
-
-    .day-circle {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: 2px solid var(--gold);
-      background: transparent;
-      color: var(--gold);
-      font-size: .8em;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all .2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: inherit;
-    }
-
-    .day-circle.active {
-      background: var(--gold);
-      color: var(--bg);
-    }
-
-    .reminder-time-row {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      margin: 12px 0;
-    }
-
-    .reminder-time-row input[type="time"] {
-      padding: 8px 12px;
-      border: 1.5px solid rgba(212, 168, 67, .3);
-      border-radius: 10px;
-      background: var(--card2);
-      color: var(--text);
-      font-family: inherit;
-      font-size: 1.1em;
-      text-align: center;
-      width: 130px;
-    }
-
-    .reminder-time-row input[type="time"]:focus {
-      outline: none;
-      border-color: var(--gold);
-    }
-
-    .reminder-status {
-      text-align: center;
-      font-size: .82em;
-      color: var(--text2);
-      margin-top: 8px;
-      line-height: 1.5;
-    }
   </style>
 </head>
 
@@ -1022,7 +959,7 @@
   <div class="header">
     <h1>﷽</h1>
     <h1>متابع حفظ القرآن</h1>
-    <p class="subtitle">ماذا أراجع اليوم؟</p>
+    <p class="subtitle" id="headerSubtitle">ماذا أراجع اليوم؟</p>
     <div class="header-actions">
       <button onclick="toggleTheme()" title="تبديل المظهر" id="themeBtn"></button>
       <button onclick="showPage('settings')" title="الإعدادات" id="settingsBtn"></button>
@@ -1148,31 +1085,7 @@
         <div class="setting-item"><label>بدء التدبر من صفحة</label><input type="number" id="setTadabburStart" min="1"
             max="604" value="1" onchange="saveSetting()"></div>
       </div>
-      <div class="card">
-        <div class="card-title"><span class="icon" id="reminderIcon"></span> التذكير اليومي</div>
-        <div class="setting-item">
-          <label>تفعيل التذكير</label>
-          <label class="toggle"><input type="checkbox" id="setReminderEnabled" onchange="saveReminderSettings()"><span class="slider"></span></label>
-        </div>
-        <div id="reminderDetails">
-          <div class="reminder-time-row">
-            <label style="color:var(--text2);font-size:.9em">وقت التذكير</label>
-            <input type="time" id="setReminderTime" value="00:00" onchange="saveReminderSettings()">
-          </div>
-          <label style="color:var(--text2);font-size:.88em;display:block;margin-bottom:4px">أيام التذكير</label>
-          <div class="day-circles" id="reminderDays">
-            <button class="day-circle active" data-day="0" onclick="toggleReminderDay(this)">Su</button>
-            <button class="day-circle active" data-day="1" onclick="toggleReminderDay(this)">Mo</button>
-            <button class="day-circle active" data-day="2" onclick="toggleReminderDay(this)">Tu</button>
-            <button class="day-circle active" data-day="3" onclick="toggleReminderDay(this)">We</button>
-            <button class="day-circle active" data-day="4" onclick="toggleReminderDay(this)">Th</button>
-            <button class="day-circle active" data-day="5" onclick="toggleReminderDay(this)">Fr</button>
-            <button class="day-circle active" data-day="6" onclick="toggleReminderDay(this)">Sa</button>
-          </div>
 
-          <div class="reminder-status" id="reminderStatus"></div>
-        </div>
-      </div>
       <div class="card">
         <div class="card-title"><span class="icon" id="dataIcon"></span> حذف البيانات</div>
         <div class="delete-data-grid">
@@ -1248,7 +1161,6 @@
       skipForward: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>`,
       database: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`,
       calendar: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
-      bell: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>`,
     };
 
     // ===== SURAH DATA [name, ayahCount, startPage] =====
@@ -1972,7 +1884,7 @@
 
     // ===== IMPORT / EXPORT =====
     function exportData() {
-      const keys = ['qt_revisions', 'qt_cycles', 'qt_tadabbur', 'qt_activity', 'qt_settings', 'qt_reminder', 'qt_onboarded'];
+      const keys = ['qt_revisions', 'qt_cycles', 'qt_tadabbur', 'qt_activity', 'qt_settings', 'qt_onboarded'];
       const data = {};
       keys.forEach(k => {
         const v = localStorage.getItem(k);
@@ -1997,7 +1909,7 @@
         try {
           const data = JSON.parse(e.target.result);
           if (!data || typeof data !== 'object') throw new Error('invalid');
-          const validKeys = ['qt_revisions', 'qt_cycles', 'qt_tadabbur', 'qt_activity', 'qt_settings', 'qt_reminder', 'qt_onboarded'];
+          const validKeys = ['qt_revisions', 'qt_cycles', 'qt_tadabbur', 'qt_activity', 'qt_settings', 'qt_onboarded'];
           const found = validKeys.filter(k => data[k] !== undefined);
           if (!found.length) { showToast('الملف لا يحتوي على بيانات صالحة', true); return }
           if (!confirm(`سيتم استيراد ${found.length} أنواع بيانات. البيانات الحالية سيتم استبدالها. متابعة؟`)) return;
@@ -2041,7 +1953,6 @@
         delTadIcon: ICONS.trash,
         delActIcon: ICONS.trash,
         delAllIcon: ICONS.trash,
-        reminderIcon: ICONS.bell,
         ioIcon: ICONS.download,
         exportBtnIcon: ICONS.download,
         importBtnIcon: ICONS.save,
@@ -2121,8 +2032,9 @@
       renderOB();
     }
 
-    // ===== REMINDER NOTIFICATIONS =====
-    const REMINDER_MSGS = [
+    // ===== SUBTITLE MESSAGES =====
+    const SUBTITLE_MSGS = [
+      'ماذا أراجع اليوم؟',
       'حان وقت مراجعة القرآن — افتح التطبيق وسجّل جلستك',
       'تعاهدوا هذا القرآن — هل راجعت وردك اليوم؟',
       'خَيْرُكُمْ مَنْ تَعَلَّمَ القرآن وَعَلَّمَهُ — ابدأ جلستك الآن',
@@ -2130,122 +2042,18 @@
       'موعدك مع كتاب الله — افتح المصحف وابدأ',
       'راجع حفظك قبل أن يضيع — المداومة سر التثبيت'
     ];
-    const REMINDER_DEFAULTS = { enabled: true, time: '00:00', days: [0,1,2,3,4,5,6] };
-    function getReminderSettings() {
-      try { return { ...REMINDER_DEFAULTS, ...JSON.parse(localStorage.getItem('qt_reminder') || '{}') } } catch(e) { return { ...REMINDER_DEFAULTS } }
-    }
-    function toggleReminderDay(btn) {
-      btn.classList.toggle('active');
-      saveReminderSettings();
-    }
-    function saveReminderSettings() {
-      const enabled = document.getElementById('setReminderEnabled').checked;
-      const time = document.getElementById('setReminderTime').value || '12:00';
-      const days = [];
-      document.querySelectorAll('#reminderDays .day-circle').forEach(btn => {
-        if (btn.classList.contains('active')) days.push(+btn.dataset.day);
-      });
-      localStorage.setItem('qt_reminder', JSON.stringify({ enabled, time, days }));
-      document.getElementById('reminderDetails').style.display = enabled ? 'block' : 'none';
-      updateReminderStatus();
-      scheduleReminder();
-    }
-    function loadReminderSettings() {
-      const r = getReminderSettings();
-      document.getElementById('setReminderEnabled').checked = r.enabled;
-      document.getElementById('setReminderTime').value = r.time;
-      document.getElementById('reminderDetails').style.display = r.enabled ? 'block' : 'none';
-      document.querySelectorAll('#reminderDays .day-circle').forEach(btn => {
-        btn.classList.toggle('active', r.days.includes(+btn.dataset.day));
-      });
-      updateReminderStatus();
-    }
-    function updateReminderStatus() {
-      const r = getReminderSettings();
-      const el = document.getElementById('reminderStatus');
-      if (!r.enabled) { el.textContent = 'التذكير معطل'; return }
-      if (!('Notification' in window)) { el.textContent = 'المتصفح لا يدعم الإشعارات'; return }
-      if (Notification.permission === 'denied') { el.innerHTML = 'الإشعارات محظورة — فعّلها من إعدادات المتصفح'; return }
-      const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-      const selectedDays = r.days.length === 7 ? 'كل يوم' : r.days.map(d => dayNames[d]).join('، ');
-      el.textContent = 'الساعة ' + r.time + ' — ' + selectedDays;
-    }
-    let reminderTimer = null;
-    function scheduleReminder() {
-      if (reminderTimer) { clearTimeout(reminderTimer); reminderTimer = null; }
-      const r = getReminderSettings();
-      if (!r.enabled || !r.days.length) return;
-      if (!('Notification' in window)) return;
-      if (Notification.permission === 'default') {
-        Notification.requestPermission();
-      }
-      // Sync reminder settings to service worker for background notifications
-      syncReminderToSW();
-      const now = new Date();
-      const [hh, mm] = r.time.split(':').map(Number);
-      let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hh, mm, 0);
-      // Find the next matching day
-      for (let i = 0; i < 8; i++) {
-        const candidate = new Date(next.getTime() + i * 86400000);
-        if (candidate > now && r.days.includes(candidate.getDay())) {
-          next = candidate;
-          break;
-        }
-      }
-      const ms = next.getTime() - now.getTime();
-      if (ms > 0 && ms < 7 * 86400000) {
-        reminderTimer = setTimeout(() => {
-          fireNotification();
-          // Reschedule for next occurrence
-          setTimeout(() => scheduleReminder(), 1000);
-        }, ms);
-      }
-    }
-    function fireNotification() {
-      if (Notification.permission !== 'granted') return;
-      const body = REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)];
-      // Use service worker showNotification (required for Android PWA)
-      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.ready.then(reg => {
-          reg.showNotification('متابع حفظ القرآن', {
-            body, icon: 'icon-192.png', badge: 'icon-192.png',
-            tag: 'qt-reminder', renotify: true,
-            vibrate: [200, 100, 200],
-            data: { url: self.location.href }
-          });
-        });
-      }
-    }
-    function syncReminderToSW() {
-      if (!navigator.serviceWorker || !navigator.serviceWorker.controller) return;
-      const r = getReminderSettings();
-      navigator.serviceWorker.controller.postMessage({
-        type: 'SET_REMINDER',
-        reminder: r,
-        messages: REMINDER_MSGS
-      });
-    }
 
     // ===== INIT =====
     document.addEventListener('DOMContentLoaded', () => {
-      initIcons(); applyTheme(); populateDropdowns(); cleanupExpired(); loadSettings(); loadReminderSettings();
+      initIcons(); applyTheme(); populateDropdowns(); cleanupExpired(); loadSettings();
+      document.getElementById('headerSubtitle').textContent = SUBTITLE_MSGS[Math.floor(Math.random() * SUBTITLE_MSGS.length)];
       const sd = document.getElementById('sessionDate');
       sd.value = todayISO();
       sd.max = todayISO();
       renderDashboard();
-      scheduleReminder();
       if (!localStorage.getItem('qt_onboarded')) showOnboarding();
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').then(() => {
-          // Once SW is ready, sync reminder settings to it
-          navigator.serviceWorker.ready.then(() => syncReminderToSW());
-        }).catch(e => console.log('SW reg failed:', e));
-      }
-    });
-    // Re-sync reminder to SW when app becomes visible again
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') {
-        scheduleReminder();
+        navigator.serviceWorker.register('sw.js').catch(e => console.log('SW reg failed:', e));
       }
     });
   </script>
